@@ -1,0 +1,47 @@
+{
+  "json_syntax": "valid",
+  "source_challenge_count": 58,
+  "declared_challenge_count": 59,
+  "normalized_challenge_count": 58,
+  "actual_family_counts": {
+    "SCN": 8,
+    "CASE": 6,
+    "DM": 6,
+    "NORM": 3,
+    "ARCH": 5,
+    "INC": 5,
+    "GOV": 1,
+    "REV": 1,
+    "SQL": 12,
+    "CM": 4,
+    "LM": 2,
+    "CLN": 3,
+    "BIZ": 2
+  },
+  "rubric_totals": {
+    "integrated_scenario": 100,
+    "complete_case": 100,
+    "sql": 100,
+    "dimensional_modeling": 100,
+    "normalization": 100,
+    "architecture_pipeline": 100,
+    "incident_debug": 100,
+    "conceptual_modeling": 100,
+    "logical_physical_modeling": 100,
+    "data_cleaning_sql": 100,
+    "greenfield_design": 100,
+    "governance": 100,
+    "review": 100
+  },
+  "duplicate_ids": [],
+  "issues": [
+    {
+      "kind": "derived_metadata_corrected",
+      "message": "bank.challenge_count corrected to actual array length",
+      "declared": 59,
+      "actual": 58
+    }
+  ],
+  "issue_count": 1,
+  "valid_challenges": 58
+}

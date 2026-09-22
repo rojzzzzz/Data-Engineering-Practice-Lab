@@ -1,0 +1,1560 @@
+{
+  "bank": {
+    "name": "Data Engineering Practice Lab - Challenge Bank",
+    "version": "0.4.0",
+    "language": "English",
+    "created_for": "Roberto Jerez",
+    "challenge_count": 59,
+    "design_principles": [
+      "Prioritize application and design over definition recall",
+      "Hide internal topic tags while the student is solving",
+      "Allow multiple technically defensible solutions",
+      "Use progressive hints and complications",
+      "Capture weak topics and mistake categories after evaluation"
+    ],
+    "source_scope": [
+      "Understanding Data Engineering",
+      "Data Warehousing Concepts",
+      "Introduction to Relational Databases in SQL",
+      "Database Design",
+      "Additional requested topics: fact-table types, SCDs, Kimball/Inmon, SQL analytics and architecture trade-offs",
+      "Conceptual, logical and physical modeling with diagrams",
+      "SQL type conversions and data cleaning",
+      "Greenfield fictional business design"
+    ],
+    "type_enum": [
+      "DESIGN", "MODEL", "PIPELINE", "ARCH", "CASE", "SQL",
+      "NORMALIZE", "INCIDENT", "EVOLVE", "GOVERN", "REVIEW",
+      "CONCEPTUAL", "LOGICAL", "PHYSICAL", "CLEAN", "GREENFIELD"
+    ],
+    "type_conventions": {
+      "prefix_rule": "ID prefix denotes challenge family; the 'type' field denotes the dominant deliverable.",
+      "families": {
+        "SCN": "Short integrated scenarios",
+        "CASE": "Long end-to-end cases",
+        "SQL": "Focused SQL exercises",
+        "DM": "Focused dimensional-modeling exercises",
+        "NORM": "Normalization exercises",
+        "ARCH": "Architecture exercises",
+        "INC": "Incident response exercises",
+        "GOV": "Governance exercises",
+        "REV": "Design review exercises",
+        "CM": "Conceptual modeling and diagrams",
+        "LM": "Logical and physical modeling (including DDL)",
+        "CLN": "Data cleaning SQL",
+        "BIZ": "Greenfield fictional business design"
+      },
+      "types_in_family": {
+        "SCN": ["DESIGN", "MODEL", "PIPELINE", "ARCH", "EVOLVE"],
+        "CASE": ["CASE"],
+        "SQL": ["SQL", "CLEAN"],
+        "DM": ["MODEL"],
+        "NORM": ["NORMALIZE"],
+        "ARCH": ["ARCH", "PIPELINE"],
+        "INC": ["INCIDENT"],
+        "GOV": ["GOVERN"],
+        "REV": ["REVIEW"],
+        "CM": ["CONCEPTUAL"],
+        "LM": ["LOGICAL", "PHYSICAL"],
+        "CLN": ["CLEAN"],
+        "BIZ": ["GREENFIELD"]
+      }
+    },
+    "artifact_formats": [
+      "prose", "bullet_outline", "diagram_drawn", "diagram_ascii",
+      "table_ddl", "query_sql", "pseudocode", "matrix", "checklist"
+    ],
+    "difficulty_bands": {
+      "1": "Recall and single-concept application. One decision to make.",
+      "2": "Two linked decisions with a clear best practice.",
+      "3": "Multiple decisions with tradeoffs; a competent learner should finish in one sitting.",
+      "4": "Integrated design under constraints; requires justification, not just answers.",
+      "5": "Capstone-level; multiple interacting tradeoffs, reproducibility and operations must all be addressed."
+    },
+    "challenge_families": [
+      { "prefix": "SCN",  "count": 8,  "intent": "Short applied scenarios across modeling, pipelines and architecture." },
+      { "prefix": "CASE", "count": 6,  "intent": "End-to-end capstones." },
+      { "prefix": "SQL",  "count": 12, "intent": "Focused query design, type conversion and data cleaning." },
+      { "prefix": "DM",   "count": 6,  "intent": "Dimensional modeling." },
+      { "prefix": "NORM", "count": 3,  "intent": "Normalization." },
+      { "prefix": "ARCH", "count": 5,  "intent": "Architecture and pipelines." },
+      { "prefix": "INC",  "count": 5,  "intent": "Incident response." },
+      { "prefix": "GOV",  "count": 1,  "intent": "Governance." },
+      { "prefix": "REV",  "count": 1,  "intent": "Design review." },
+      { "prefix": "CM",   "count": 4,  "intent": "Conceptual modeling and diagram drawing." },
+      { "prefix": "LM",   "count": 2,  "intent": "Logical and physical modeling including DDL." },
+      { "prefix": "CLN",  "count": 3,  "intent": "Data cleaning SQL." },
+      { "prefix": "BIZ",  "count": 2,  "intent": "Greenfield fictional business design." }
+    ],
+    "learning_paths": [
+      { "name": "Foundations", "goal": "Grain, keys, normalization and basic modeling.", "challenges": ["NORM-001", "NORM-003", "DM-003", "SCN-002", "SQL-001"], "estimated_hours": 3 },
+      { "name": "Dimensional Modeling Core", "goal": "Fact types, SCDs, bridges, lifecycle facts.", "challenges": ["DM-001", "DM-003", "DM-004", "DM-005", "DM-006", "SCN-001", "SCN-003"], "estimated_hours": 4 },
+      { "name": "SQL for Analytics", "goal": "Windows, temporal joins, cohorts, hierarchies.", "challenges": ["SQL-001", "SQL-002", "SQL-003", "SQL-004", "SQL-005", "SQL-006", "SQL-007"], "estimated_hours": 4 },
+      { "name": "Architecture and Pipelines", "goal": "Batch/stream, CDC, lakehouse/lake/warehouse tradeoffs.", "challenges": ["ARCH-001", "ARCH-002", "ARCH-003", "ARCH-004", "ARCH-005", "SCN-005", "SCN-007"], "estimated_hours": 5 },
+      { "name": "Operations and Incidents", "goal": "Diagnose, correct, prevent. Run and monitor pipelines.", "challenges": ["INC-001", "INC-002", "INC-003", "INC-004", "INC-005", "SCN-005"], "estimated_hours": 4 },
+      { "name": "Governance and Review", "goal": "Privacy, reproducibility, critique.", "challenges": ["GOV-001", "REV-001", "CASE-004", "CASE-005"], "estimated_hours": 5 },
+      { "name": "Capstone", "goal": "Full end-to-end design under realistic constraints.", "challenges": ["CASE-001", "CASE-002", "CASE-003", "CASE-004", "CASE-005", "CASE-006"], "estimated_hours": 9 },
+      { "name": "Modeling Artifacts", "goal": "Conceptual, logical and physical modeling plus diagram drawing.", "challenges": ["CM-001", "CM-002", "CM-003", "CM-004", "LM-001", "LM-002"], "estimated_hours": 5 },
+      { "name": "SQL Type Conversions and Cleaning", "goal": "Casting, parsing, deduplication, null handling.", "challenges": ["SQL-008", "SQL-009", "SQL-010", "SQL-011", "SQL-012"], "estimated_hours": 4 },
+      { "name": "Greenfield Design", "goal": "Invent a business and model it end-to-end.", "challenges": ["BIZ-001", "BIZ-002"], "estimated_hours": 4 }
+    ],
+    "prerequisite_graph": {
+      "NORM-001": [], "NORM-002": ["NORM-001"], "NORM-003": ["NORM-001"],
+      "DM-001": [], "DM-002": ["DM-001"], "DM-003": ["DM-001"], "DM-004": ["DM-001"], "DM-005": ["SCN-002"], "DM-006": ["SQL-003"],
+      "SQL-001": [], "SQL-002": ["DM-003"], "SQL-003": ["DM-005"], "SQL-004": [], "SQL-005": ["SQL-002"], "SQL-006": ["SQL-004"], "SQL-007": ["SQL-001"],
+      "SQL-008": ["CLN-001"], "SQL-009": ["SQL-008"], "SQL-010": ["CLN-001"], "SQL-011": ["CLN-002"], "SQL-012": ["CLN-003"],
+      "ARCH-001": [], "ARCH-002": ["ARCH-001"], "ARCH-003": ["ARCH-001"], "ARCH-004": ["ARCH-002"], "ARCH-005": ["ARCH-001"],
+      "INC-001": ["DM-002", "SQL-001"], "INC-002": ["ARCH-002"], "INC-003": ["ARCH-004"], "INC-004": ["ARCH-003"], "INC-005": ["ARCH-002", "SCN-005"],
+      "GOV-001": ["CASE-004"], "REV-001": ["DM-001", "SCN-001"],
+      "CM-001": [], "CM-002": ["CM-001"], "CM-003": ["DM-001"], "CM-004": ["ARCH-001"],
+      "LM-001": ["NORM-001"], "LM-002": ["LM-001"],
+      "CLN-001": ["SQL-001"], "CLN-002": ["CLN-001"], "CLN-003": ["SQL-001"],
+      "BIZ-001": ["CM-001", "DM-001"], "BIZ-002": ["BIZ-001", "LM-001"],
+      "CASE-001": ["SCN-001", "SCN-006", "DM-001", "SQL-001"],
+      "CASE-002": ["SCN-001", "DM-004"],
+      "CASE-003": ["DM-001", "ARCH-001"],
+      "CASE-004": ["DM-001", "DM-005"],
+      "CASE-005": ["SCN-005", "ARCH-002"],
+      "CASE-006": ["SCN-007", "DM-001"]
+    },
+    "assessment_notes": {
+      "session_mechanics": [
+        "Use one challenge per sitting unless the learner explicitly requests a combined path.",
+        "Hints are opt-in and level-gated; do not volunteer them.",
+        "Evaluation only runs when the learner says 'evaluate'.",
+        "follow_up_complications are stretch work and should be scored separately if used."
+      ],
+      "time_budget_guidance": {
+        "warmup": "One difficulty-2 or 3 challenge (25-30 min).",
+        "main": "One difficulty-4 challenge (30-40 min) or a full case (75-90 min).",
+        "stretch": "One follow_up_complication per session, not more.",
+        "review": "One review_exercise per weak topic identified during evaluation."
+      },
+      "score_combination": [
+        "Per-challenge rubric scores are independent; do not average across families.",
+        "Track weak topics by frequency of occurrence across sessions, not by single-session score.",
+        "Use mistake_categories to weight review priorities: DESIGN and TRADEOFF mistakes compound across challenges; SQL mistakes are local."
+      ]
+    },
+    "topic_index": {
+      "abstraction": ["CM-001"],
+      "accumulating_snapshot": ["SCN-003", "DM-001", "CASE-002", "CASE-004", "CASE-006"],
+      "additivity": ["SCN-002", "SCN-006", "CM-003"],
+      "aggregation_order": ["SQL-002"],
+      "allocation": ["DM-003"],
+      "allocation_factor": ["DM-002", "INC-001"],
+      "allocated_facts": ["SCN-006"],
+      "association_table": ["CM-002"],
+      "batch_reconciliation": ["SCN-005", "CASE-005"],
+      "batch_vs_stream": ["SCN-005"],
+      "bridge_table": ["SCN-003", "DM-002", "INC-001", "CM-003"],
+      "business_keys": ["CASE-006"],
+      "candidate_key": ["NORM-003", "CM-002"],
+      "canonical_model": ["CASE-006"],
+      "cardinality": ["SCN-003", "SCN-004", "CM-001"],
+      "case_normalization": ["CLN-001"],
+      "cast_and_convert": ["SQL-008", "SQL-009"],
+      "change_data_capture": ["ARCH-004", "INC-002"],
+      "check_constraint": ["LM-001"],
+      "clustering": ["LM-002"],
+      "cohort_analysis": ["SQL-004"],
+      "cohort_sql": ["SCN-004"],
+      "column_store": ["SCN-005", "SCN-007", "LM-002"],
+      "columnar_storage": ["SCN-007"],
+      "compression": ["LM-002"],
+      "conceptual_model": ["CM-001", "CM-002"],
+      "conformed_dimension": ["SCN-001", "DM-004", "CASE-001", "CASE-003"],
+      "cte": ["SQL-001", "SQL-004"],
+      "currency_conversion": ["SCN-006"],
+      "cycle_detection": ["SQL-007"],
+      "data_lineage": ["SCN-008", "CASE-004", "CM-004"],
+      "data_mart": ["ARCH-001"],
+      "data_marts": ["CASE-003"],
+      "data_masking": ["ARCH-003", "CM-004"],
+      "data_validation": ["CASE-002", "CLN-002"],
+      "data_types": ["LM-001"],
+      "date_parsing": ["SQL-008", "SQL-009"],
+      "ddl": ["LM-001", "LM-002"],
+      "deduplication": ["CASE-006", "CLN-001"],
+      "default_values": ["CLN-003"],
+      "degenerate_dimension": ["SCN-006", "DM-001"],
+      "dense_rank": ["SQL-001"],
+      "dependency_reasoning": ["NORM-001", "NORM-002"],
+      "diagram_drawing": ["CM-001", "CM-002", "CM-003", "CM-004"],
+      "distinct_count": ["SQL-004"],
+      "distribution": ["LM-002"],
+      "document_extraction": ["CASE-002"],
+      "domain_discovery": ["BIZ-001", "BIZ-002"],
+      "downsampling": ["SCN-008"],
+      "entities": ["CM-001"],
+      "etl": ["CASE-002"],
+      "etl_elt": ["ARCH-003"],
+      "event_time": ["CASE-005", "INC-005"],
+      "explicit_vs_implicit_cast": ["SQL-009"],
+      "fact_constellation": ["DM-004"],
+      "factless_fact": ["SCN-004", "DM-002", "DM-003"],
+      "fanout_join": ["INC-001"],
+      "first_normal_form": ["NORM-001"],
+      "federated_governance": ["ARCH-001"],
+      "foreign_key": ["LM-001"],
+      "foreign_keys": ["SCN-003", "NORM-003"],
+      "gap_and_island": ["SQL-006"],
+      "grain": ["INC-001", "CASE-002", "CM-003"],
+      "greenfield_design": ["BIZ-001", "BIZ-002"],
+      "group_by": ["SQL-001"],
+      "historical_transaction_value": ["NORM-001"],
+      "hybrid": ["CASE-003", "ARCH-001", "ARCH-005"],
+      "idempotency": ["SCN-005", "INC-002", "ARCH-004", "CLN-001"],
+      "immutable_snapshot": ["SCN-008"],
+      "incremental_load": ["CASE-003", "INC-002"],
+      "indexing": ["LM-001"],
+      "inferred_member": ["DM-006"],
+      "inmon": ["CASE-003", "ARCH-001", "ARCH-005"],
+      "junction_table": ["NORM-001"],
+      "kimball": ["CASE-001", "CASE-003", "ARCH-001", "ARCH-005"],
+      "lakehouse": ["SCN-008", "CASE-001", "ARCH-005"],
+      "lambda_or_unified_stream": ["SCN-005"],
+      "late_arriving_data": ["SCN-003", "CASE-002", "CASE-005"],
+      "late_arriving_dimension": ["SQL-003", "DM-006"],
+      "late_arriving_facts": ["SCN-005"],
+      "last_value_pattern": ["SQL-002"],
+      "lineage_layers": ["CM-004"],
+      "logical_model": ["CM-002"],
+      "logical_types": ["CM-002"],
+      "many_to_many": ["SCN-004", "NORM-003", "DM-002", "CM-001", "CM-002"],
+      "materialized_view": ["SQL-007"],
+      "medallion": ["ARCH-005"],
+      "monetary_precision": ["LM-001"],
+      "normalization_vs_denormalization": ["NORM-002"],
+      "null_safe_joins": ["CLN-003"],
+      "null_semantics": ["CLN-003"],
+      "numeric_precision": ["LM-001"],
+      "observability": ["ARCH-002", "INC-002", "INC-004"],
+      "optionality": ["CM-001"],
+      "orchestration": ["ARCH-002", "INC-002"],
+      "partial_dependency": ["NORM-002"],
+      "partial_fulfillment": ["DM-001"],
+      "partition_pruning": ["SQL-001"],
+      "partitioning": ["ARCH-002", "INC-002", "SQL-006", "LM-002"],
+      "periodic_snapshot": ["SCN-001", "SCN-003", "CASE-001", "DM-003"],
+      "pii_masking": ["CM-004"],
+      "point_in_time_correctness": ["CASE-004"],
+      "predicate_pushdown": ["LM-002"],
+      "primary_key": ["NORM-001", "LM-001"],
+      "promotion_analysis": ["CASE-003"],
+      "quarantine": ["CLN-002"],
+      "raw_staging_curated_serving": ["CM-004"],
+      "reason_codes": ["CLN-002"],
+      "recursive_cte": ["SQL-007"],
+      "recursive_hierarchy": ["SQL-007"],
+      "referential_integrity": ["NORM-003", "CASE-002"],
+      "regex": ["CLN-001", "CLN-002"],
+      "regex_extraction": ["CLN-002"],
+      "reconciliation_test": ["INC-001", "INC-004"],
+      "relationships": ["CM-001"],
+      "role_playing_date": ["SCN-002", "DM-001", "DM-003"],
+      "role_playing_dimension": ["SCN-003"],
+      "rollup": ["SQL-007"],
+      "row_number_difference": ["SQL-006"],
+      "row_number_vs_dense_rank": ["SQL-001"],
+      "running_total": ["SQL-005"],
+      "safe_cast": ["SQL-008", "SQL-009"],
+      "schema_evolution": ["ARCH-002", "INC-003"],
+      "schema_on_read": ["SCN-007", "ARCH-003", "ARCH-005"],
+      "schema_on_write": ["SCN-007", "ARCH-003", "ARCH-005"],
+      "scd_type_2": ["SCN-001", "SCN-002", "SCN-004", "SQL-003", "DM-004", "DM-005", "CASE-004", "CM-003"],
+      "scd_type_3": ["DM-005"],
+      "scd_type_6": ["DM-005"],
+      "semi_additive_fact": ["SCN-001", "SCN-002", "SQL-002"],
+      "staging_layer": ["CASE-002"],
+      "star_schema": ["CM-003"],
+      "stream_processing": ["SCN-005", "SCN-007", "SCN-008", "ARCH-002"],
+      "string_split": ["CLN-002"],
+      "surrogate_key": ["SCN-001", "SCN-004", "NORM-002", "NORM-003", "LM-001", "CLN-001"],
+      "temporal_join": ["SQL-003"],
+      "third_normal_form": ["NORM-001"],
+      "three_valued_logic": ["CLN-003"],
+      "tiered_storage": ["ARCH-002"],
+      "time_series_fact": ["CASE-005"],
+      "time_zone": ["SQL-006"],
+      "tie_break": ["SQL-005"],
+      "transitive_dependency": ["NORM-002"],
+      "transactional_fact": ["SCN-001", "SCN-002", "SCN-006", "DM-001", "DM-003", "DM-004"],
+      "trim": ["CLN-001"],
+      "unknown_member": ["SQL-003", "DM-006"],
+      "versioned_business_rules": ["DM-002"],
+      "views_security": ["SCN-003"],
+      "watermark": ["SCN-005", "CASE-005", "INC-005"],
+      "window_functions": ["SQL-001", "SQL-002", "SQL-005", "SQL-006"],
+      "window_frame": ["SQL-005"],
+      "window_semantics": ["INC-005"]
+    },
+    "glossary": {
+      "grain": "The exact meaning of one row in a fact table.",
+      "additive": "A measure that can be summed across every dimension.",
+      "semi_additive": "A measure that can be summed across some dimensions but not others (typically not time).",
+      "non_additive": "A measure that cannot be summed across any dimension (ratios, percentages).",
+      "conformed_dimension": "A dimension shared across multiple fact tables with consistent meaning and keys.",
+      "degenerate_dimension": "A dimension key stored directly on the fact without its own dimension table.",
+      "accumulating_snapshot": "A fact whose row is updated as a process moves through milestones.",
+      "periodic_snapshot": "A fact capturing state at regular intervals.",
+      "transactional_fact": "A fact capturing an event at the moment it occurs.",
+      "factless_fact": "A fact table with no measures, capturing relationships or events.",
+      "scd_type_2": "History preserved by adding a new row for each change with validity dates.",
+      "scd_type_3": "History preserved by adding a previous-value column.",
+      "scd_type_6": "Hybrid of types 1, 2 and 3 in one dimension.",
+      "bridge_table": "A table resolving a many-to-many relationship between a fact and a dimension.",
+      "fanout": "Row multiplication caused by joining tables at different grains.",
+      "watermark": "A threshold for deciding when late data is no longer expected.",
+      "idempotent": "A write operation that produces the same result when repeated.",
+      "event_time": "When the event occurred in the source world.",
+      "processing_time": "When the event was processed by the pipeline.",
+      "point_in_time_correctness": "Using only the data that was known at the moment being modeled.",
+      "cdc": "Change Data Capture: extracting inserts, updates and deletes from a source.",
+      "medallion": "A layered lakehouse pattern: bronze (raw), silver (validated), gold (curated).",
+      "inferred_member": "A dimension row created for a business key that has not yet arrived in the source.",
+      "gap_and_island": "A technique using date-minus-row-number to detect consecutive runs.",
+      "conceptual_model": "A business-level model of entities and relationships, independent of any database.",
+      "logical_model": "A technology-neutral representation as tables, columns and keys.",
+      "physical_model": "A database-specific representation with types, constraints, indexes and storage.",
+      "logical_type": "A type description independent of any DBMS (identifier, text, monetary, date).",
+      "artifact": "A concrete deliverable the learner must produce (diagram, DDL, query, matrix)."
+    },
+    "mistake_category_examples": {
+      "KNOWLEDGE": "Confusing Type 2 with Type 1 SCD; misstating a normal form; not knowing TRY_CAST exists.",
+      "APPLICATION": "Correctly naming a concept but applying it to the wrong grain or wrong level (conceptual vs logical).",
+      "REQUIREMENTS": "Missing or misreading a stated constraint (e.g., ignoring 'exclusive ValidTo').",
+      "DESIGN": "Fanout join, one fact for two processes, or dimension without history.",
+      "SQL": "Wrong join keys, missing tie handling, incorrect window frame, unsafe CAST.",
+      "TRADEOFF": "Choosing a technology or methodology without stating costs or alternatives.",
+      "COMMUNICATION": "Correct answer not explainable to a stakeholder; unclear grain statement; unreadable diagram."
+    },
+    "anti_patterns_catalog": [
+      "One universal fact table for every process.",
+      "Natural IDs used as warehouse keys without source-system namespace.",
+      "Summing semi-additive measures across time.",
+      "Joining many-to-many tables directly to a fact and duplicating measures.",
+      "Overwriting historical dimension attributes in place.",
+      "Deleting reversed or cancelled transactions instead of preserving them.",
+      "Using the current dimension row for historical facts.",
+      "One diagnosis / phone / category column per entity.",
+      "Choosing a methodology or platform without stating tradeoffs.",
+      "Retrying an entire pipeline instead of resuming from a checkpoint.",
+      "Exactly-once claims without an idempotency mechanism.",
+      "No raw replay layer for stream processing.",
+      "Recomputing published reports with new classifications.",
+      "Fraud or ML features built with data unavailable at prediction time.",
+      "Storing PII in every fact row.",
+      "Recursive CTE without a cycle guard.",
+      "Window frame with default RANGE on non-unique ordering.",
+      "Putting foreign keys in a conceptual model.",
+      "Using SQL types in a logical model.",
+      "Casting free-text columns with unsafe CAST instead of TRY_CAST.",
+      "COALESCE to zero to hide NULL semantics.",
+      "Silently dropping rows during cleaning.",
+      "Non-idempotent in-place UPDATE cleaning."
+    ],
+    "evaluation_examples": [
+      {
+        "challenge_ref": "SQL-001",
+        "weak_answer": "Joins FactSales to DimProduct and DimStore, groups by region and product, orders by revenue desc, returns top 3 with ROW_NUMBER.",
+        "why_weak": [
+          "ROW_NUMBER drops ties; requirement says include ties.",
+          "Date filter uses GETDATE() without deriving the last completed quarter.",
+          "No SaleStatus filter.",
+          "Ranking on raw rows, not aggregated region-product revenue."
+        ],
+        "strong_answer_sketch": "CTE aggregates revenue by region and product within the completed quarter, filters SaleStatus, then DENSE_RANK partitioned by region, and returns rows where rank <= 3.",
+        "rubric_delta": { "correctness": "-25 to -30 for weak", "edge_cases": "-10 for tie loss", "grain_and_join_logic": "-5 if aggregation order wrong" }
+      }
+    ],
+    "review_plan": {
+      "principle": "One focused review exercise per weak topic, chosen from the bank's review_exercise fields.",
+      "procedure": [
+        "After evaluation, list the top two weak topics.",
+        "For each, pick the review_exercise from the challenge where the weak topic appeared.",
+        "If the same weak topic appears in more than one challenge, prefer the lowest-difficulty review_exercise.",
+        "Reassess after two sessions; if the weak topic persists, move the learner back one step in prerequisite_graph."
+      ]
+    }
+  },
+  "mistake_categories": ["KNOWLEDGE", "APPLICATION", "REQUIREMENTS", "DESIGN", "SQL", "TRADEOFF", "COMMUNICATION"],
+  "prompt_templates": {
+    "student": "Act as my Data Engineering practice instructor. Do not solve the challenge or reveal its hidden topics. Let me work through every task. Clarify requirements when necessary, but do not suggest a technology, schema, key, fact type, dimension type or architecture unless I explicitly request a hint. If I provide a partial answer, ask questions that expose gaps without completing it. Wait until I request evaluation.",
+    "hint": "Give only the requested hint level. Level 1 points toward the decision, Level 2 names the relevant concept, and Level 3 gives a strong directional hint without presenting the complete solution.",
+    "evaluation": "Evaluate technical correctness, internal consistency, requirements coverage and reasoning. Accept multiple defensible solutions. Score each rubric category, explain strengths and improvements, identify important mistakes, assign mistake categories, list weak topics, and propose one focused review exercise."
+  },
+  "rubrics": {
+    "integrated_scenario": { "requirements_interpretation": 15, "grain_and_model": 25, "architecture_or_pipeline": 20, "sql_or_implementation": 15, "tradeoff_reasoning": 15, "clarity": 10 },
+    "complete_case": { "requirements_interpretation": 10, "grain": 15, "fact_design": 15, "dimension_design": 15, "architecture_and_pipeline": 15, "sql_and_implementation": 15, "tradeoff_reasoning": 10, "clarity": 5 },
+    "sql": { "correctness": 45, "grain_and_join_logic": 15, "edge_cases": 15, "performance": 15, "clarity": 10 },
+    "dimensional_modeling": { "business_process_and_grain": 25, "fact_design": 25, "dimension_design": 25, "history_and_additivity": 15, "clarity": 10 },
+    "normalization": { "normal_form_analysis": 25, "dependency_reasoning": 25, "final_schema": 30, "keys_and_integrity": 15, "clarity": 5 },
+    "architecture_pipeline": { "requirements_and_slas": 15, "architecture": 30, "data_flow_and_quality": 25, "scalability_and_operations": 20, "tradeoffs_and_clarity": 10 },
+    "incident_debug": { "diagnosis": 30, "evidence_and_tests": 20, "corrective_design": 25, "prevention_and_monitoring": 15, "communication": 10 },
+    "conceptual_modeling": { "entities_and_attributes": 25, "relationships_and_cardinality": 25, "abstraction_quality": 20, "diagram_clarity": 15, "justification": 15 },
+    "logical_physical_modeling": { "logical_correctness": 25, "physical_types_and_constraints": 30, "indexes_and_storage": 20, "ddl_validity": 15, "clarity": 10 },
+    "data_cleaning_sql": { "correctness": 30, "edge_cases": 20, "idempotency_and_safety": 20, "performance": 15, "clarity": 15 },
+    "greenfield_design": { "domain_invention_quality": 20, "business_process_discovery": 25, "modeling_execution": 25, "deliverable_completeness": 20, "clarity": 10 }
+  },
+  "challenges": [
+    {
+      "id": "SCN-001",
+      "title": "Food Aid Inventory Across Country Offices",
+      "type": "DESIGN",
+      "difficulty": 4,
+      "estimated_minutes": 35,
+      "rubric_ref": "integrated_scenario",
+      "artifacts_required": ["prose", "bullet_outline"],
+      "student": {
+        "scenario": "An international NGO receives donated goods in five countries. Each country records shipments, warehouse receipts, delivery orders and beneficiaries in a separate operational database. Headquarters needs consolidated inventory and distribution reporting without slowing local operations.",
+        "requirements": ["Daily quantity received, on hand and distributed by country, warehouse, product and donor", "Historical reporting when beneficiary classifications or product categories change", "A single shipment may contain several lots and expiration dates", "Country systems use overlapping product and beneficiary IDs"],
+        "tasks": ["Separate operational and analytical responsibilities", "Define the required fact tables and the grain of each", "Identify conformed dimensions and key strategy", "Explain how balances should aggregate across warehouses and dates", "Sketch the daily pipeline and two data-quality checks"],
+        "constraints": ["Daily refresh by 06:00 UTC", "Seven years of history", "Local systems must remain available during extraction"],
+        "deliverables": ["Architecture outline", "Grain statements", "Fact/dimension list", "Key and history strategy", "Quality controls"]
+      },
+      "internal": {
+        "domains": ["dimensional_modeling", "data_warehousing", "pipelines"],
+        "topics": ["transactional_fact", "periodic_snapshot", "semi_additive_fact", "conformed_dimension", "surrogate_key", "scd_type_2"],
+        "prerequisites": ["primary_and_foreign_keys", "star_schema", "etl_elt"],
+        "assessment_focus": "The learner should distinguish distribution events from inventory balances and prevent summing balances across time.",
+        "common_traps": ["One fact table for every process", "Natural IDs without source-system namespace", "Summing quantity on hand across dates"]
+      },
+      "hints": ["Ask whether a delivery and a midnight balance describe the same kind of event.", "Consider separate transactional and periodic-snapshot facts.", "Quantity on hand is additive across products and warehouses, but not across snapshot dates."],
+      "follow_up_complications": ["One country begins sending stock changes every five minutes.", "Headquarters requires the beneficiary category as it existed on the delivery date.", "A shipment correction arrives two weeks after month-end close."],
+      "review_exercise": "Given a small sample of shipment and snapshot rows, write two grain statements and one aggregation query that must not sum across snapshot dates."
+    },
+    {
+      "id": "SCN-002",
+      "title": "Bank Balances and Customer Transactions",
+      "type": "MODEL",
+      "difficulty": 3,
+      "estimated_minutes": 30,
+      "rubric_ref": "integrated_scenario",
+      "artifacts_required": ["prose", "bullet_outline"],
+      "student": {
+        "scenario": "A regional bank stores every account transaction and a balance for each account at midnight. Analysts need transaction volume, average daily balance and end-of-month balance by branch and customer segment.",
+        "requirements": ["Preserve customer segment history", "Accounts may move to another branch", "Reversed transactions must remain auditable", "Reports must support daily and monthly analysis"],
+        "tasks": ["Define the business processes", "Choose fact-table types and grains", "Classify the principal measures by additivity", "Design dimensions and history handling", "Explain how to calculate end-of-month and average balances without double counting"],
+        "constraints": ["Ten years of history", "Balances can be corrected after arrival"],
+        "deliverables": ["Two or more grain statements", "Star-schema outline", "Measure classification", "Calculation logic"]
+      },
+      "internal": {
+        "domains": ["dimensional_modeling", "sql"],
+        "topics": ["transactional_fact", "periodic_snapshot", "semi_additive_fact", "role_playing_date", "scd_type_2"],
+        "prerequisites": ["grain", "facts_and_dimensions"],
+        "assessment_focus": "Balances and flows require different facts and aggregation behavior.",
+        "common_traps": ["Summing daily balances across a month", "Overwriting historical segment", "Deleting reversed transactions"]
+      },
+      "hints": ["Separate movements from states.", "Transaction amount and account balance do not aggregate identically across time.", "Use a transaction fact for movements and a daily snapshot for balances; select the last valid date for month-end."],
+      "follow_up_complications": ["Finance asks for intraday balances every 15 minutes.", "A customer can jointly own several accounts.", "Branch reorganizations must be reported both historically and under the current hierarchy."],
+      "review_exercise": "Classify five measures as additive, semi-additive or non-additive and state the correct aggregation path for each."
+    },
+    {
+      "id": "SCN-003",
+      "title": "Hospital Encounters, Beds and Outcomes",
+      "type": "DESIGN",
+      "difficulty": 4,
+      "estimated_minutes": 35,
+      "rubric_ref": "integrated_scenario",
+      "artifacts_required": ["prose", "bullet_outline", "diagram_drawn"],
+      "student": {
+        "scenario": "A hospital network wants analytics for patient encounters, bed occupancy, diagnoses, procedures and discharge outcomes. Operational systems differ by hospital and update throughout the day.",
+        "requirements": ["Daily occupancy by ward", "Length of stay and time between admission milestones", "Multiple diagnoses and procedures per encounter", "Patient privacy and restricted analyst access"],
+        "tasks": ["Identify business processes and grains", "Choose fact-table types", "Model many-valued diagnoses and procedures", "Design date/time roles", "Propose a privacy-aware analytical access strategy"],
+        "constraints": ["Dashboards refresh hourly", "Personally identifiable data must be minimized", "Late discharge updates are common"],
+        "deliverables": ["Dimensional model", "History and bridge strategy", "Pipeline summary", "Security approach"]
+      },
+      "internal": {
+        "domains": ["dimensional_modeling", "governance_security", "pipelines"],
+        "topics": ["accumulating_snapshot", "periodic_snapshot", "bridge_table", "role_playing_dimension", "late_arriving_data", "views_security"],
+        "prerequisites": ["cardinality", "foreign_keys"],
+        "assessment_focus": "The model should support milestones, occupancy states and multivalued clinical classifications.",
+        "common_traps": ["One diagnosis column", "Patient PII in every fact", "Using only the current discharge status"]
+      },
+      "hints": ["Admission has milestones; occupancy is a recurring state.", "An accumulating snapshot can track lifecycle dates, while a periodic snapshot supports occupancy.", "Many diagnoses per encounter may require a bridge or factless association table."],
+      "follow_up_complications": ["Patients may be transferred between wards several times.", "Regulators request deletion or de-identification of selected patient data.", "A new hospital uses different diagnosis codes."],
+      "review_exercise": "Model one encounter with two diagnoses and one procedure at both a bridge-table grain and a periodic-snapshot grain, then explain why both are needed."
+    },
+    {
+      "id": "SCN-004",
+      "title": "University Enrollment and Student Progress",
+      "type": "EVOLVE",
+      "difficulty": 3,
+      "estimated_minutes": 30,
+      "rubric_ref": "integrated_scenario",
+      "artifacts_required": ["prose", "bullet_outline"],
+      "student": {
+        "scenario": "A university wants reporting on applications, enrollment, course registrations, grades and graduation. Students can change majors, take a course more than once and enroll in more than one program.",
+        "requirements": ["Enrollment counts by term and program", "Retention cohorts", "Grade distribution by course and instructor", "Historical major at the time of registration"],
+        "tasks": ["Define facts and grains", "Resolve student-program and course-attempt cardinalities", "Choose dimension history strategies", "Identify role-playing date dimensions", "Describe one cohort-retention SQL approach"],
+        "constraints": ["Semester and short-course calendars coexist", "Legacy student IDs can be reused after migration"],
+        "deliverables": ["Model outline", "Grain statements", "History design", "Retention query logic"]
+      },
+      "internal": {
+        "domains": ["relational_design", "dimensional_modeling", "sql"],
+        "topics": ["many_to_many", "factless_fact", "transactional_fact", "scd_type_2", "cohort_sql", "surrogate_key"],
+        "prerequisites": ["cardinality", "joins"],
+        "assessment_focus": "Each course attempt must be preserved and program membership must be modeled over time.",
+        "common_traps": ["One row per student", "Overwriting major", "Course code as globally unique key"]
+      },
+      "hints": ["A student can generate several distinct events in the same course.", "State the grain with student, course offering, term and attempt.", "Treat changing majors historically and isolate reused source IDs with a durable warehouse key."],
+      "follow_up_complications": ["The university acquires another institution with overlapping IDs.", "Management wants near-real-time registration dashboards.", "A course may be co-taught by several instructors."],
+      "review_exercise": "Write a single grain statement that survives a student taking the same course twice under two different majors."
+    },
+    {
+      "id": "SCN-005",
+      "title": "Telecom Usage and Billing Reconciliation",
+      "type": "PIPELINE",
+      "difficulty": 5,
+      "estimated_minutes": 35,
+      "rubric_ref": "integrated_scenario",
+      "artifacts_required": ["prose", "bullet_outline", "diagram_drawn"],
+      "student": {
+        "scenario": "A telecom receives billions of call-detail and data-usage records each day. Operations needs dashboards within two minutes; finance needs an exact daily billable total reconciled to the billing system.",
+        "requirements": ["Near-real-time network usage", "Daily authoritative revenue reconciliation", "Duplicate and out-of-order events", "Customer plans and cell-tower attributes change over time"],
+        "tasks": ["Design a combined streaming and batch architecture", "Define event identity and deduplication", "Select analytical grains", "Explain history handling", "Define freshness and reconciliation metrics"],
+        "constraints": ["Three billion events per day", "Events can arrive 24 hours late", "Dashboard availability is more important than perfect immediate completeness"],
+        "deliverables": ["Data-flow architecture", "Serving model", "Watermark/reprocessing policy", "Quality and SLA metrics"]
+      },
+      "internal": {
+        "domains": ["stream_processing", "data_architecture", "data_quality"],
+        "topics": ["lambda_or_unified_stream", "idempotency", "watermarks", "late_arriving_facts", "column_store", "batch_reconciliation"],
+        "prerequisites": ["batch_vs_stream", "latency", "scalability"],
+        "assessment_focus": "The design must explicitly separate provisional low-latency results from authoritative reconciled results.",
+        "common_traps": ["Exactly-once claims without mechanism", "One SLA for operations and finance", "No replay strategy"]
+      },
+      "hints": ["The two consumers do not require the same balance of latency and correctness.", "Think about a fast provisional path plus an authoritative replayable path.", "Use stable event IDs, idempotent writes, watermarks and daily batch reconciliation."],
+      "follow_up_complications": ["A region goes offline for six hours and later uploads all events.", "Finance disputes a completed month after a tariff correction.", "Retention rules require raw event deletion after 90 days."],
+      "review_exercise": "Write two SLAs (freshness and completeness) for the same dataset and explain why a single number cannot satisfy both consumers."
+    },
+    {
+      "id": "SCN-006",
+      "title": "E-Commerce Returns and Profitability",
+      "type": "MODEL",
+      "difficulty": 4,
+      "estimated_minutes": 30,
+      "rubric_ref": "integrated_scenario",
+      "artifacts_required": ["prose", "bullet_outline"],
+      "student": {
+        "scenario": "An online retailer reports revenue correctly but cannot explain profitability after partial returns, discounts, taxes, shipping and exchange-rate changes.",
+        "requirements": ["Line-level revenue and cost", "Partial returns months after purchase", "Reports in local and corporate currency", "Promotion and product-category history"],
+        "tasks": ["Define transaction grains for sales and returns", "Choose how to link returns to original sales", "Classify measures by additivity", "Design currency-rate handling", "Propose a net-profit query approach"],
+        "constraints": ["Orders may contain multiple currencies only through later settlement adjustments", "Exchange rates are supplied daily"],
+        "deliverables": ["Fact/dimension design", "Measure definitions", "Return linkage", "SQL logic outline"]
+      },
+      "internal": {
+        "domains": ["dimensional_modeling", "sql"],
+        "topics": ["transactional_fact", "degenerate_dimension", "allocated_facts", "currency_conversion", "scd_type_2", "role_playing_date"],
+        "prerequisites": ["grain", "additivity"],
+        "assessment_focus": "The model must preserve gross events and support net calculations without overwriting history.",
+        "common_traps": ["Updating original sale rows", "Mixing order and line grain", "Summing percentages"]
+      },
+      "hints": ["Do not erase the original economic event.", "Returns can be separate transactions linked to the original line.", "Store monetary components at a consistent line-event grain and make the applied exchange-rate date explicit."],
+      "follow_up_complications": ["Shipping cost exists only at order level.", "A return is refunded at a different exchange rate.", "Finance changes its definition of contribution margin."],
+      "review_exercise": "Write one sentence per measure stating its grain and additivity."
+    },
+    {
+      "id": "SCN-007",
+      "title": "City Transit Reliability",
+      "type": "ARCH",
+      "difficulty": 4,
+      "estimated_minutes": 35,
+      "rubric_ref": "integrated_scenario",
+      "artifacts_required": ["prose", "bullet_outline", "diagram_drawn"],
+      "student": {
+        "scenario": "A city collects GPS pings from buses, scheduled timetables, ticket validations and maintenance records. It wants route reliability, passenger demand and vehicle downtime analysis.",
+        "requirements": ["Vehicle positions every 10 seconds", "Daily on-time performance", "Ridership by route and stop", "Historical route and stop changes"],
+        "tasks": ["Place each source in an appropriate ingestion and storage path", "Define analytical business processes and grains", "Explain batch versus streaming use", "Handle route-version history", "Propose performance storage formats"],
+        "constraints": ["GPS produces semi-structured events", "Five-year analytical retention", "Operations dashboard target latency is 30 seconds"],
+        "deliverables": ["Architecture", "Model outline", "History design", "Latency rationale"]
+      },
+      "internal": {
+        "domains": ["data_lake", "stream_processing", "dimensional_modeling"],
+        "topics": ["schema_on_read", "schema_on_write", "stream_processing", "periodic_or_event_fact", "scd_type_2", "columnar_storage"],
+        "prerequisites": ["structured_vs_semi_structured", "oltp_vs_olap"],
+        "assessment_focus": "The learner should avoid forcing every raw GPS event directly into a reporting star without a suitable raw/processing layer.",
+        "common_traps": ["Warehouse-only raw ingestion", "No schedule version", "Treating route name as stable key"]
+      },
+      "hints": ["Raw telemetry and curated reporting tables have different schema needs.", "Use flexible raw storage before validated, schema-on-write analytical models.", "Version route/stop definitions and aggregate or derive trip-level reliability facts for reporting."],
+      "follow_up_complications": ["GPS data contains long gaps in tunnels.", "The city changes the definition of on-time performance.", "A new payment provider sends duplicated validations."],
+      "review_exercise": "Place four sources (GPS, timetable, ticket, maintenance) into raw, processing and serving layers with one justification each."
+    },
+    {
+      "id": "SCN-008",
+      "title": "Manufacturing Quality and Sensor Data",
+      "type": "DESIGN",
+      "difficulty": 5,
+      "estimated_minutes": 35,
+      "rubric_ref": "integrated_scenario",
+      "artifacts_required": ["prose", "bullet_outline", "diagram_drawn"],
+      "student": {
+        "scenario": "A manufacturer combines production orders, machine sensor readings, inspections and defects. Engineers want real-time anomaly detection; management wants monthly yield and cost reporting.",
+        "requirements": ["Sensor readings at millisecond frequency", "Trace each finished unit to production batch and machine", "Defects may be reclassified later", "Monthly yield must remain reproducible"],
+        "tasks": ["Design storage and processing layers", "Define facts at sensor, inspection and production grains", "Choose history strategy for defect classifications", "Separate real-time and governed reporting outputs", "Specify lineage and quality controls"],
+        "constraints": ["Petabyte-scale sensor history", "Only 13 months of raw high-frequency data are retained", "Regulatory reports must reproduce prior published totals"],
+        "deliverables": ["Layered architecture", "Fact grains", "Retention strategy", "Reproducibility controls"]
+      },
+      "internal": {
+        "domains": ["data_architecture", "stream_processing", "governance"],
+        "topics": ["lakehouse", "stream_processing", "downsampling", "scd_type_2", "data_lineage", "immutable_snapshot"],
+        "prerequisites": ["data_lake", "warehouse", "fact_tables"],
+        "assessment_focus": "Different resolutions and consumers require tiered data and reproducible curated outputs.",
+        "common_traps": ["Keeping every sensor point forever in the warehouse", "Recomputing old reports with new classifications", "No unit-to-batch traceability"]
+      },
+      "hints": ["Ask which data needs millisecond detail and for how long.", "Separate raw telemetry, derived features and governed reporting facts.", "Freeze or version the semantic inputs used for published regulatory periods."],
+      "follow_up_complications": ["A defective sensor produced biased values for three weeks.", "Management wants cross-factory benchmarking despite different machine models.", "A regulator requests the exact data lineage for one batch."],
+      "review_exercise": "Draw a three-tier retention policy (raw, downsampled, governed) and state what each tier must preserve."
+    },
+    {
+      "id": "CASE-001",
+      "title": "BlueCart International Commerce Platform",
+      "type": "CASE",
+      "difficulty": 5,
+      "estimated_minutes": 90,
+      "rubric_ref": "complete_case",
+      "artifacts_required": ["prose", "diagram_drawn", "query_sql", "matrix"],
+      "student": {
+        "scenario": "BlueCart operates e-commerce businesses in eight countries. PostgreSQL stores orders, MySQL stores inventory, a CRM stores customers, suppliers send CSV files, a REST API provides exchange rates and JSON captures web events.",
+        "requirements": ["Revenue and margin", "Historical inventory", "Customer segmentation", "Fulfillment performance", "Historical geography and product category", "Near-real-time web funnels", "Daily finance reconciliation"],
+        "tasks": ["Classify source workloads and data types", "Choose warehouse/lake/lakehouse components and justify them", "Design ingestion, staging and transformation flows", "Apply Kimball's four steps to each business process", "Define fact grains and dimensions", "Choose SCD and key strategies", "Write SQL logic for quarterly top-three products per region", "Define security, quality, observability and recovery"],
+        "constraints": ["Five billion web events per month", "Finance closes by 08:00 local time", "Product and customer IDs overlap after acquisitions"],
+        "deliverables": ["End-to-end architecture", "Source-to-target flow", "Dimensional model", "SQL", "Operations and governance plan"]
+      },
+      "internal": {
+        "domains": ["data_architecture", "dimensional_modeling", "sql", "governance"],
+        "topics": ["lakehouse", "kimball", "conformed_dimensions", "transactional_fact", "periodic_snapshot", "accumulating_snapshot", "scd_type_2", "window_functions"],
+        "prerequisites": ["oltp_olap", "etl_elt", "joins", "grain"],
+        "assessment_focus": "A coherent end-to-end design matters more than naming a fashionable platform.",
+        "common_traps": ["One universal fact", "No source-system key mapping", "Near-real-time finance without reconciliation", "Tags that reveal model decisions"]
+      },
+      "hints": ["List business processes before listing tables.", "Sales, inventory, fulfillment and web behavior have different grains and latency requirements.", "Use conformed dimensions across stars, durable source-key mapping, and a separate low-latency web path with governed reconciliation."],
+      "follow_up_complications": ["BlueCart acquires a competitor with overlapping IDs and different currencies.", "GDPR deletion requests must be fulfilled without corrupting aggregate finance history.", "The nightly transformation exceeds its six-hour window."],
+      "review_exercise": "Produce a one-page bus matrix (business processes vs conformed dimensions) for BlueCart."
+    },
+    {
+      "id": "CASE-002",
+      "title": "Global Health Supply Chain",
+      "type": "CASE",
+      "difficulty": 4,
+      "estimated_minutes": 75,
+      "rubric_ref": "complete_case",
+      "artifacts_required": ["prose", "diagram_drawn", "query_sql"],
+      "student": {
+        "scenario": "A global health organization purchases medicines, receives donations, ships containers, manages country warehouses and distributes goods to clinics. Data arrives from ERP tables, Access databases, spreadsheets and scanned shipment documents.",
+        "requirements": ["End-to-end shipment status", "Stock by lot and expiration date", "Distribution to clinics and programs", "Wastage and ineffective-use analysis", "Donor compliance reporting"],
+        "tasks": ["Design source ingestion and document-extraction boundaries", "Choose operational versus analytical models", "Define shipment, inventory and distribution facts", "Model lots, containers, programs and beneficiaries", "Plan validation and exception handling", "Write SQL logic for stock expiring within 60 days", "Define auditability and access controls"],
+        "constraints": ["Some offices sync only once daily", "Source spreadsheets contain blank required fields", "Corrections must preserve an audit trail"],
+        "deliverables": ["Architecture", "Dimensional model", "Data-quality framework", "SQL", "Governance plan"]
+      },
+      "internal": {
+        "domains": ["data_integration", "dimensional_modeling", "data_quality"],
+        "topics": ["staging_layer", "transactional_fact", "periodic_snapshot", "accumulating_snapshot", "data_validation", "late_arriving_data", "document_extraction"],
+        "prerequisites": ["referential_integrity", "etl", "grain"],
+        "assessment_focus": "The learner should distinguish ingesting uncertain source data from accepting it into trusted analytical tables.",
+        "common_traps": ["Direct spreadsheet-to-fact load", "Ignoring lot/expiration grain", "Updating shipment history in place"]
+      },
+      "hints": ["Untrusted incoming rows need a place to land before becoming official records.", "Use staging plus validation/quarantine, then model shipment lifecycle, stock snapshots and delivery events separately.", "Lot and expiration date may be required in the inventory grain; preserve source documents and correction lineage."],
+      "follow_up_complications": ["A donor changes reporting categories mid-year.", "A container contains the same product in multiple lots.", "Country offices need offline operation and later synchronization."],
+      "review_exercise": "Write the grain of a stock snapshot that survives both multiple lots per product and corrections to a shipment."
+    },
+    {
+      "id": "CASE-003",
+      "title": "National Retail Chain Modernization",
+      "type": "CASE",
+      "difficulty": 4,
+      "estimated_minutes": 75,
+      "rubric_ref": "complete_case",
+      "artifacts_required": ["prose", "diagram_drawn", "query_sql", "matrix"],
+      "student": {
+        "scenario": "A retailer with 120 stores has normalized point-of-sale and inventory databases. Headquarters relies on emailed spreadsheets and wants a governed enterprise analytics platform.",
+        "requirements": ["Same-day sales", "Daily inventory", "Promotion effectiveness", "Supplier performance", "Store and product hierarchy history", "Self-service departmental marts"],
+        "tasks": ["Compare Kimball, Inmon and hybrid approaches", "Recommend an architecture", "Define enterprise conformed dimensions", "Design sales, inventory and supplier facts", "Plan incremental loads", "Write SQL logic for promotion lift", "Define semantic ownership and access"],
+        "constraints": ["On-premises sources and cloud analytics", "Six years of history", "Budget favors staged delivery by domain"],
+        "deliverables": ["Methodology decision", "Roadmap", "Models", "Pipeline", "SQL and governance"]
+      },
+      "internal": {
+        "domains": ["warehouse_methodology", "dimensional_modeling", "hybrid_cloud"],
+        "topics": ["kimball", "inmon", "hybrid", "data_marts", "conformed_dimensions", "incremental_load", "promotion_analysis"],
+        "prerequisites": ["data_warehouse", "data_mart", "star_schema"],
+        "assessment_focus": "Methodology must follow organizational and delivery needs, not ideology.",
+        "common_traps": ["Choosing a methodology without tradeoffs", "Independent marts with incompatible dimensions", "No baseline for promotion lift"]
+      },
+      "hints": ["Consider both enterprise consistency and incremental business value.", "A hybrid can combine governed integration with dimensional marts.", "Promotion analysis needs an explicit comparison baseline and careful grain, not only promoted sales totals."],
+      "follow_up_complications": ["Finance and marketing define net revenue differently.", "A store closes and later reopens under another format.", "Supplier lead-time data arrives only weekly."],
+      "review_exercise": "Write a three-row decision matrix comparing Kimball, Inmon and hybrid against delivery speed and enterprise consistency."
+    },
+    {
+      "id": "CASE-004",
+      "title": "Insurance Claims Analytics and Fraud Signals",
+      "type": "CASE",
+      "difficulty": 5,
+      "estimated_minutes": 90,
+      "rubric_ref": "complete_case",
+      "artifacts_required": ["prose", "diagram_drawn", "query_sql"],
+      "student": {
+        "scenario": "An insurer combines policy administration, claims, payments, adjuster notes, repair-shop files and external fraud scores. Claims evolve over months and can reopen after closure.",
+        "requirements": ["Claim-cycle performance", "Paid and reserved amounts", "Loss ratios", "Fraud investigation queues", "Point-in-time policy and customer attributes", "Auditable model inputs"],
+        "tasks": ["Design layered architecture for structured and text data", "Define accumulating, transaction and snapshot facts", "Model claim reopening", "Choose SCD strategies", "Design a fraud-feature pipeline without mixing training and future data", "Write logic for claim duration and current reserve", "Define governance and model lineage"],
+        "constraints": ["Personally sensitive data", "Claims can be backdated", "Regulators require reproducible decisions"],
+        "deliverables": ["Architecture", "Dimensional model", "Temporal logic", "Fraud data controls", "SQL outline"]
+      },
+      "internal": {
+        "domains": ["dimensional_modeling", "machine_learning_data", "governance"],
+        "topics": ["accumulating_snapshot", "transactional_fact", "periodic_snapshot", "point_in_time_correctness", "scd_type_2", "data_lineage"],
+        "prerequisites": ["fact_types", "history"],
+        "assessment_focus": "The solution must preserve lifecycle, financial movements and point-in-time correctness independently.",
+        "common_traps": ["Current policy values applied to old claims", "Reserve treated as additive across dates", "Label leakage in fraud features"]
+      },
+      "hints": ["A claim has milestones, money movements and changing balances.", "Those needs usually imply more than one fact type.", "Build fraud features using only data available at the prediction timestamp and version the exact inputs."],
+      "follow_up_complications": ["A catastrophe creates 100 times normal daily volume.", "A closed claim reopens twice.", "A new privacy rule limits adjuster-note retention."],
+      "review_exercise": "State the point-in-time correctness rule for one fraud feature and one loss-ratio measure."
+    },
+    {
+      "id": "CASE-005",
+      "title": "Energy Utility Smart-Meter Platform",
+      "type": "CASE",
+      "difficulty": 5,
+      "estimated_minutes": 90,
+      "rubric_ref": "complete_case",
+      "artifacts_required": ["prose", "diagram_drawn", "query_sql"],
+      "student": {
+        "scenario": "An electric utility receives 15-minute smart-meter readings, outage events, billing transactions, weather data and technician work orders.",
+        "requirements": ["Near-real-time outage maps", "Daily consumption analytics", "Billing reconciliation", "Demand forecasting", "Meter and customer-location history", "Detection of missing or impossible readings"],
+        "tasks": ["Design streaming and batch paths", "Choose raw and curated storage", "Define event and snapshot grains", "Handle late/corrected readings", "Model meter replacement and premise history", "Write daily consumption aggregation logic", "Define quality SLAs and replay"],
+        "constraints": ["Twenty million meters", "Readings may arrive three days late", "Billing totals must be reproducible"],
+        "deliverables": ["Architecture", "Model", "Temporal correction policy", "SQL/pseudocode", "Monitoring plan"]
+      },
+      "internal": {
+        "domains": ["stream_processing", "data_quality", "dimensional_modeling"],
+        "topics": ["event_time", "watermark", "idempotency", "scd_type_2", "time_series_fact", "batch_reconciliation"],
+        "prerequisites": ["batch_stream", "surrogate_key"],
+        "assessment_focus": "Event time and processing time must be distinguished, with correction and replay policies.",
+        "common_traps": ["Dropping late readings", "Meter ID equals customer", "No authoritative billing close"]
+      },
+      "hints": ["When did the reading occur versus when was it received?", "Use event-time processing, watermarks and replayable raw data.", "Version meter-to-premise/customer relationships; reconcile curated interval usage to billing snapshots."],
+      "follow_up_complications": ["A daylight-saving transition creates duplicated local timestamps.", "A meter firmware bug reports negative values.", "Regulators require recalculating a prior tariff period."],
+      "review_exercise": "Write the event-time vs processing-time policy for one reading that arrives three days late."
+    },
+    {
+      "id": "CASE-006",
+      "title": "Global Logistics Control Tower",
+      "type": "CASE",
+      "difficulty": 4,
+      "estimated_minutes": 75,
+      "rubric_ref": "complete_case",
+      "artifacts_required": ["prose", "diagram_drawn", "query_sql"],
+      "student": {
+        "scenario": "A logistics company tracks bookings, containers, ports, GPS devices, customs milestones, invoices and delivery confirmations across carriers.",
+        "requirements": ["Current shipment status", "Milestone cycle times", "On-time delivery", "Cost by route and carrier", "Historical port and carrier attributes", "Exception alerts"],
+        "tasks": ["Define canonical business keys across carriers", "Design lifecycle and cost facts", "Choose role-playing dates", "Build ingestion for APIs, EDI and GPS", "Handle missing/duplicate milestones", "Write logic for on-time percentage", "Define operational alerts versus analytical reporting"],
+        "constraints": ["Carrier event formats differ", "Events may arrive out of order", "Shipment IDs are not globally unique"],
+        "deliverables": ["Canonical model", "Architecture", "Fact grains", "Quality rules", "KPI logic"]
+      },
+      "internal": {
+        "domains": ["data_integration", "dimensional_modeling", "stream_processing"],
+        "topics": ["canonical_model", "accumulating_snapshot", "transactional_fact", "degenerate_dimension", "role_playing_date", "deduplication"],
+        "prerequisites": ["business_keys", "etl"],
+        "assessment_focus": "Carrier-specific identities and event vocabularies must be mapped into a durable canonical model.",
+        "common_traps": ["Shipment number as universal key", "Assuming milestone order equals arrival order", "Mixing latest status with immutable event history"]
+      },
+      "hints": ["Source identifiers need a carrier context.", "Keep immutable milestone events and derive/update a lifecycle snapshot.", "Use a canonical event vocabulary, source-key mapping and explicit event timestamps for KPI calculations."],
+      "follow_up_complications": ["A carrier retransmits its last 30 days of events.", "One container is split across two final deliveries.", "Customs changes the required milestone sequence."],
+      "review_exercise": "Write the canonical key rule for one shipment that appears in three carriers' systems."
+    },
+    {
+      "id": "SQL-001",
+      "title": "Top Products by Regional Revenue",
+      "type": "SQL",
+      "difficulty": 3,
+      "estimated_minutes": 25,
+      "rubric_ref": "sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "Return the top three products by net revenue in each region for the previous completed calendar quarter, using the tables below.",
+        "create_table_block": "CREATE TABLE FactSales (\n  DateKey      INT     NOT NULL,\n  ProductKey   INT     NOT NULL,\n  StoreKey     INT     NOT NULL,\n  Quantity     INT     NOT NULL,\n  NetRevenue   NUMERIC(14,2) NOT NULL,\n  SaleStatus   TEXT    NOT NULL\n);\nCREATE TABLE DimDate (\n  DateKey      INT     PRIMARY KEY,\n  FullDate     DATE    NOT NULL,\n  Quarter      INT     NOT NULL,\n  Year         INT     NOT NULL\n);\nCREATE TABLE DimProduct (\n  ProductKey   INT     PRIMARY KEY,\n  ProductName  TEXT    NOT NULL,\n  CategoryName TEXT    NOT NULL\n);\nCREATE TABLE DimStore (\n  StoreKey     INT     PRIMARY KEY,\n  StoreName    TEXT    NOT NULL,\n  RegionName   TEXT    NOT NULL\n);",
+        "requirements": ["Include ties", "Exclude returned/cancelled lines using SaleStatus", "Do not hard-code quarter dates", "Show region, product, revenue and rank"],
+        "tasks": ["Write the SQL", "Explain the date boundary", "Explain the ranking function", "Identify indexes or physical design that could help"],
+        "constraints": ["SQL dialect may be PostgreSQL or explained pseudocode", "FactSales has 800 million rows"],
+        "deliverables": ["Query", "Short correctness explanation", "Performance notes"]
+      },
+      "internal": {
+        "domains": ["sql", "performance"],
+        "topics": ["cte", "group_by", "date_logic", "dense_rank", "star_join", "partition_pruning"],
+        "prerequisites": ["joins", "aggregations", "window_functions"],
+        "assessment_focus": "Aggregation must occur before ranking within region.",
+        "common_traps": ["Ranking raw sale rows", "Current incomplete quarter", "ROW_NUMBER when ties must be included"]
+      },
+      "hints": ["The ranking input should have one row per region-product.", "Aggregate first, then use a window function partitioned by region.", "DENSE_RANK on summed revenue includes ties; derive the last completed quarter boundaries from the current date."],
+      "follow_up_complications": ["Also return each product's percentage of regional revenue.", "Use fiscal quarters beginning in February.", "Return only products that ranked in the top three in at least two consecutive quarters."],
+      "review_exercise": "Write the aggregate CTE and the ranking CTE as two separate statements, then combine them."
+    },
+    {
+      "id": "SQL-002",
+      "title": "Inventory Balance Without Double Counting",
+      "type": "SQL",
+      "difficulty": 4,
+      "estimated_minutes": 30,
+      "rubric_ref": "sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "Produce month-end inventory and average daily inventory by product and warehouse.",
+        "create_table_block": "CREATE TABLE FactInventorySnapshot (\n  SnapshotDateKey INT NOT NULL,\n  ProductKey      INT NOT NULL,\n  WarehouseKey    INT NOT NULL,\n  LotKey          INT NOT NULL,\n  QuantityOnHand  NUMERIC(14,3) NOT NULL\n);\nCREATE TABLE DimDate (\n  DateKey  INT PRIMARY KEY,\n  FullDate DATE NOT NULL\n);",
+        "requirements": ["Some days are missing", "Month-end means the latest available snapshot on or before calendar month-end", "Do not sum quantities across dates", "Average daily inventory should use one daily total after summing lots"],
+        "tasks": ["Write SQL for month-end balance", "Write SQL for average daily balance", "Explain the aggregation order", "Describe behavior when a whole month has no snapshot"],
+        "constraints": ["PostgreSQL-style SQL", "Multiple lots exist per product and warehouse"],
+        "deliverables": ["Two queries or one clearly separated query", "Edge-case explanation"]
+      },
+      "internal": {
+        "domains": ["sql", "dimensional_modeling"],
+        "topics": ["semi_additive_fact", "last_value_pattern", "window_functions", "aggregation_order"],
+        "prerequisites": ["group_by", "cte"],
+        "assessment_focus": "The learner must aggregate lots at day level, then select/average daily balances.",
+        "common_traps": ["SUM over the month", "Average of lot rows", "MAX quantity instead of last date"]
+      },
+      "hints": ["First create the correct daily grain.", "Sum lots per product-warehouse-day before any time calculation.", "Rank available dates descending within each month for month-end; average the daily totals, not the raw lot rows."],
+      "follow_up_complications": ["Carry the last prior balance into months with no snapshots.", "Add corporate currency inventory value using historical costs.", "Calculate days of stock using trailing 30-day demand."],
+      "review_exercise": "Write the daily-grain CTE first, then the month-end selection, then the average."
+    },
+    {
+      "id": "SQL-003",
+      "title": "Customer History Point-in-Time Join",
+      "type": "SQL",
+      "difficulty": 4,
+      "estimated_minutes": 30,
+      "rubric_ref": "sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "Resolve each order to the customer version valid at order time using the SCD Type 2 dimension.",
+        "create_table_block": "CREATE TABLE FactOrder (\n  OrderID              BIGINT PRIMARY KEY,\n  OrderTimestamp       TIMESTAMP NOT NULL,\n  CustomerBusinessKey  TEXT NOT NULL,\n  Amount               NUMERIC(14,2) NOT NULL\n);\nCREATE TABLE DimCustomer (\n  CustomerKey         BIGINT PRIMARY KEY,\n  CustomerBusinessKey TEXT NOT NULL,\n  CustomerName        TEXT NOT NULL,\n  Segment             TEXT NOT NULL,\n  ValidFrom           TIMESTAMP NOT NULL,\n  ValidTo             TIMESTAMP NOT NULL,\n  IsCurrent           BOOLEAN NOT NULL\n);",
+        "requirements": ["Resolve each order to the customer version valid at order time", "Detect zero matches and overlapping multiple matches", "Do not silently select an arbitrary version", "Provide a repair approach for unmatched rows"],
+        "tasks": ["Write the point-in-time join", "Write diagnostic SQL for zero/multiple matches", "Explain boundary conventions", "Propose an unknown-member and late-arrival policy"],
+        "constraints": ["ValidTo is exclusive", "Some customer changes arrive after their orders"],
+        "deliverables": ["Join SQL", "Diagnostics", "Repair policy"]
+      },
+      "internal": {
+        "domains": ["sql", "dimensional_modeling"],
+        "topics": ["scd_type_2", "temporal_join", "late_arriving_dimension", "unknown_member", "data_quality"],
+        "prerequisites": ["joins", "surrogate_keys"],
+        "assessment_focus": "Temporal predicates and uniqueness validation must be explicit.",
+        "common_traps": ["Join to IsCurrent", "BETWEEN with inclusive end overlap", "Inner join hiding unmatched facts"]
+      },
+      "hints": ["The current dimension row is not necessarily the historical row.", "Use ValidFrom <= event time and event time < ValidTo.", "Start with a left join and count candidate versions; route zero and multiple matches to exceptions rather than guessing."],
+      "follow_up_complications": ["ValidTo is NULL for current rows.", "Source timestamps use local time zones.", "Two source systems reuse the same customer business key."],
+      "review_exercise": "Write the temporal predicate and prove it against a customer whose ValidTo is exclusive."
+    },
+    {
+      "id": "SQL-004",
+      "title": "Retention Cohort Analysis",
+      "type": "SQL",
+      "difficulty": 5,
+      "estimated_minutes": 35,
+      "rubric_ref": "sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "Build a cohort report showing the percentage of first-time students still enrolled one, two and three terms later.",
+        "create_table_block": "CREATE TABLE FactEnrollment (\n  StudentKey       BIGINT NOT NULL,\n  ProgramKey       INT NOT NULL,\n  TermKey          INT NOT NULL,\n  EnrollmentStatus TEXT NOT NULL\n);\nCREATE TABLE DimTerm (\n  TermKey       INT PRIMARY KEY,\n  TermStartDate DATE NOT NULL,\n  AcademicYear  INT NOT NULL,\n  TermSequence  INT NOT NULL\n);",
+        "requirements": ["Cohort is the student's first enrolled term in a program", "Ignore withdrawn registrations", "A student may skip a term and return", "Denominator remains the original cohort size"],
+        "tasks": ["Write the SQL", "Explain cohort and retention grains", "Prevent duplicate registrations from inflating counts", "Discuss whether skipped-and-returned students count at each interval"],
+        "constraints": ["Use TermSequence rather than date arithmetic", "Return cohort term, program, cohort size and retention rates"],
+        "deliverables": ["Query", "Grain explanation", "Edge-case discussion", "Performance notes"]
+      },
+      "internal": {
+        "domains": ["sql", "analytics"],
+        "topics": ["cohort_analysis", "cte", "conditional_aggregation", "distinct_count", "grain"],
+        "prerequisites": ["group_by", "window_functions"],
+        "assessment_focus": "Cohort membership must be established once before measuring later presence.",
+        "common_traps": ["Changing denominators", "Counting registration rows", "Date arithmetic across irregular terms"]
+      },
+      "hints": ["Build the cohort table before joining later activity.", "Find MIN TermSequence per student-program, then test existence at offsets.", "Use distinct students in the fixed cohort denominator and conditional distinct counts for +1, +2 and +3."],
+      "follow_up_complications": ["Report continuous retention separately from return retention.", "Students can change programs.", "Compare cohorts by the student's historical residency region."],
+      "review_exercise": "Write a fixed-denominator cohort table for one program and one intake term, then compute +1 and +2 retention."
+    },
+    {
+      "id": "SQL-005",
+      "title": "Running Account Balance Without Double Counting",
+      "type": "SQL",
+      "difficulty": 4,
+      "estimated_minutes": 30,
+      "rubric_ref": "sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "Produce a running balance per account at each transaction and a daily closing balance per account.",
+        "create_table_block": "CREATE TABLE FactTransaction (\n  AccountKey          BIGINT NOT NULL,\n  TransactionTimestamp TIMESTAMP NOT NULL,\n  Amount              NUMERIC(14,2) NOT NULL,\n  TransactionType     TEXT NOT NULL\n);",
+        "requirements": ["Reversals are recorded as negative-amount transactions", "Multiple transactions can share the same timestamp", "Daily closing balance is the balance after the last transaction of the day", "Do not sum across days for the running balance"],
+        "tasks": ["Write SQL for the running balance", "Write SQL for the daily closing balance", "Explain the window frame and tie-break", "Explain behavior when two transactions share a timestamp"],
+        "constraints": ["PostgreSQL-style SQL", "FactTransaction has 500 million rows"],
+        "deliverables": ["Two queries", "Window frame explanation", "Tie-break policy"]
+      },
+      "internal": {
+        "domains": ["sql", "performance"],
+        "topics": ["window_functions", "running_total", "window_frame", "tie_break", "grain"],
+        "prerequisites": ["sql_002", "window_functions"],
+        "assessment_focus": "The learner must state a deterministic tie-break and a correct window frame.",
+        "common_traps": ["Default RANGE frame including peers", "No tie-break on equal timestamps", "Summing daily closing balances across days"]
+      },
+      "hints": ["A running total needs a deterministic order, including ties.", "Use ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW with an explicit secondary order key.", "Daily closing balance is a last-value-per-day problem, not a sum of daily totals."],
+      "follow_up_complications": ["Backdated transactions arrive days later.", "Account is closed and reopened.", "Finance wants the balance as of end of business in a specific time zone."],
+      "review_exercise": "Write a running total over a table with duplicate timestamps and prove your tie-break is deterministic."
+    },
+    {
+      "id": "SQL-006",
+      "title": "Gap-and-Island for Consecutive Activity",
+      "type": "SQL",
+      "difficulty": 5,
+      "estimated_minutes": 35,
+      "rubric_ref": "sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "Identify each user's longest consecutive-day login streak and the start and end dates of that streak.",
+        "create_table_block": "CREATE TABLE FactLogin (\n  UserKey   BIGINT NOT NULL,\n  LoginDate DATE   NOT NULL\n);",
+        "requirements": ["Days are calendar days in the user's time zone", "A user may have multiple streaks", "Return the longest streak per user, with ties broken by earliest start", "Ignore days with no login"],
+        "tasks": ["Write the SQL", "Explain the island detection method", "Explain how you handle time zones", "Identify index or partitioning choices that would help at scale"],
+        "constraints": ["PostgreSQL-style SQL", "FactLogin has 2 billion rows"],
+        "deliverables": ["Query", "Island logic explanation", "Time-zone handling", "Performance notes"]
+      },
+      "internal": {
+        "domains": ["sql"],
+        "topics": ["gap_and_island", "window_functions", "row_number_difference", "time_zone", "partitioning"],
+        "prerequisites": ["sql_004"],
+        "assessment_focus": "The learner must recognize the classic date-minus-row-number island technique.",
+        "common_traps": ["Self-join per day", "Assuming unique logins per day", "Ignoring time zone"]
+      },
+      "hints": ["A consecutive-day run has a constant difference between the date and its row number.", "Partition by user and order by login date, then subtract ROW_NUMBER from the date to get a group key.", "Aggregate per island to get start, end and length; rank islands per user for the longest streak."],
+      "follow_up_complications": ["Only weekdays count.", "A streak can span a month boundary.", "Users may log in from multiple time zones."],
+      "review_exercise": "Detect islands for a small sample where two users share the same date and one user has two streaks."
+    },
+    {
+      "id": "SQL-007",
+      "title": "Recursive Hierarchy Rollup",
+      "type": "SQL",
+      "difficulty": 4,
+      "estimated_minutes": 30,
+      "rubric_ref": "sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "Produce revenue rolled up to every level of the management hierarchy, including each manager's own sales.",
+        "create_table_block": "CREATE TABLE DimEmployee (\n  EmployeeKey    BIGINT PRIMARY KEY,\n  ManagerKey     BIGINT NULL,\n  EmployeeName   TEXT NOT NULL,\n  DepartmentKey  INT NOT NULL\n);\nCREATE TABLE FactSales (\n  EmployeeKey BIGINT NOT NULL,\n  SaleDate    DATE   NOT NULL,\n  NetRevenue  NUMERIC(14,2) NOT NULL\n);",
+        "requirements": ["Hierarchy depth is unknown", "A manager also sells", "No cycles in the data, but the query should not hang if one exists", "Return level number and path for each row"],
+        "tasks": ["Write the recursive SQL", "Explain cycle protection", "Explain how you avoid double counting a sale at multiple levels", "Propose a materialized rollup for performance"],
+        "constraints": ["PostgreSQL-style SQL", "DimEmployee has 80,000 rows"],
+        "deliverables": ["Recursive query", "Cycle protection", "Rollup materialization plan"]
+      },
+      "internal": {
+        "domains": ["sql", "dimensional_modeling"],
+        "topics": ["recursive_hierarchy", "recursive_cte", "rollup", "cycle_detection", "materialized_view"],
+        "prerequisites": ["sql_001"],
+        "assessment_focus": "Recursion must be bounded and the rollup grain must be stated.",
+        "common_traps": ["Self-join fixed depth", "Double counting when a sale rolls up through multiple paths", "No cycle guard"]
+      },
+      "hints": ["A recursive CTE with a path column gives both depth and cycle protection.", "State the rollup grain before writing recursion.", "Consider a materialized path or closure table if the hierarchy is read often."],
+      "follow_up_complications": ["An employee reports to two managers (matrix organization).", "Hierarchy changes mid-year.", "Revenue must be allocated across dotted-line managers."],
+      "review_exercise": "Write the recursive CTE with a path column and prove a cycle would be caught."
+    },
+    {
+      "id": "SQL-008",
+      "title": "Type Conversions: Dirty Source Ingestion",
+      "type": "SQL",
+      "difficulty": 4,
+      "estimated_minutes": 35,
+      "rubric_ref": "data_cleaning_sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "A staging table loads every column as TEXT because the source is inconsistent. You must produce a typed target table while routing bad rows to a quarantine table.",
+        "create_table_block": "CREATE TABLE staging_order (\n  order_id_text     TEXT,\n  customer_id_text  TEXT,\n  order_date_text   TEXT,\n  quantity_text     TEXT,\n  unit_price_text   TEXT,\n  is_gift_text      TEXT\n);\nCREATE TABLE clean_order (\n  order_id     BIGINT PRIMARY KEY,\n  customer_id  BIGINT NOT NULL,\n  order_date   DATE   NOT NULL,\n  quantity     INT    NOT NULL,\n  unit_price   NUMERIC(12,2) NOT NULL,\n  is_gift      BOOLEAN NOT NULL\n);\nCREATE TABLE quarantine_order (\n  raw_order_id_text TEXT,\n  reason_code       TEXT,\n  raw_payload       JSONB\n);",
+        "requirements": [
+          "Cast every column to its target type",
+          "Use safe casts where the source is unreliable (TRY_CAST or equivalent)",
+          "Route uncastable rows to quarantine with a reason code",
+          "Never let a bad row silently become NULL or zero",
+          "Idempotent: re-running produces the same result"
+        ],
+        "tasks": [
+          "Write the INSERT ... SELECT that populates clean_order",
+          "Write the INSERT ... SELECT that populates quarantine_order",
+          "List every reason code and the predicate that produces it",
+          "Explain one conversion that is safe and one that is not"
+        ],
+        "constraints": ["PostgreSQL-style SQL (or explain equivalent safe-cast in your dialect)", "No silent NULL or zero defaults"],
+        "deliverables": ["Clean insert SQL", "Quarantine insert SQL", "Reason-code list", "Cast safety discussion"]
+      },
+      "internal": {
+        "domains": ["sql", "data_cleaning"],
+        "topics": ["cast_and_convert", "safe_cast", "date_parsing", "numeric_precision", "quarantine", "reason_codes", "idempotency"],
+        "prerequisites": ["cln_001"],
+        "assessment_focus": "Every cast must be deliberate and every failure must be captured with a reason.",
+        "common_traps": [
+          "Direct CAST that aborts on one bad row",
+          "COALESCE to zero to silence errors",
+          "One catch-all reason code",
+          "Non-idempotent inserts"
+        ]
+      },
+      "hints": [
+        "Some casts fail loudly and some succeed silently; pick the one that matches the source reliability.",
+        "A quarantine table turns bad rows into data, not into a failure.",
+        "One reason code per validation rule keeps metrics meaningful."
+      ],
+      "follow_up_complications": [
+        "Some dates use DD/MM/YYYY and some use MM/DD/YYYY.",
+        "unit_price_text sometimes contains a currency symbol.",
+        "is_gift_text contains yes/no, Y/N, 1/0 and true/false."
+      ],
+      "review_exercise": "Write three TRY_CAST expressions and state what each returns for an invalid input."
+    },
+    {
+      "id": "SQL-009",
+      "title": "Type Conversion Traps: Precision, Dates, Booleans",
+      "type": "SQL",
+      "difficulty": 5,
+      "estimated_minutes": 35,
+      "rubric_ref": "data_cleaning_sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "You are given four queries that run without error but produce wrong results because of implicit or lossy conversions. Diagnose each and rewrite it safely.",
+        "create_table_block": "-- Assume these tables exist\n-- users(id BIGINT, age_text TEXT, signup_ts TIMESTAMP)\n-- payments(id BIGINT, amount_text TEXT)\n-- flags(id BIGINT, active_text TEXT)",
+        "requirements": [
+          "Explain why each query is wrong",
+          "Rewrite each query using explicit and safe conversion",
+          "State the exact failure mode (rounding, truncation, silent NULL, abort)",
+          "Propose a lint rule or test that would catch the class of bug"
+        ],
+        "tasks": [
+          "Diagnose query A: SELECT * FROM users WHERE age_text > 30",
+          "Diagnose query B: SELECT amount_text::FLOAT FROM payments",
+          "Diagnose query C: SELECT * FROM flags WHERE active_text = TRUE",
+          "Diagnose query D: SELECT SUM(amount_text::NUMERIC(10,2)) FROM payments",
+          "Rewrite all four safely",
+          "Propose one automated check"
+        ],
+        "constraints": ["PostgreSQL-style SQL", "Address precision explicitly for money"],
+        "deliverables": ["Four diagnoses", "Four rewritten queries", "One automated check proposal"]
+      },
+      "internal": {
+        "domains": ["sql", "data_cleaning"],
+        "topics": ["explicit_vs_implicit_cast", "numeric_precision", "date_parsing", "safe_cast", "three_valued_logic"],
+        "prerequisites": ["sql_008"],
+        "assessment_focus": "The learner must name the failure mode, not just fix the query.",
+        "common_traps": [
+          "String comparison on numeric-looking text",
+          "FLOAT for money",
+          "Comparing text to boolean literal",
+          "Ignoring silent NULL from failed casts"
+        ]
+      },
+      "hints": [
+        "Implicit conversion is a silent contract; the DB decides for you.",
+        "Money needs exact arithmetic; float does not give you that.",
+        "Test each rewritten query against one intentionally bad row."
+      ],
+      "follow_up_complications": [
+        "The text column sometimes contains a leading plus sign.",
+        "The timestamp column arrives in a non-ISO format.",
+        "The boolean text column uses 'Y', 'N' and NULL."
+      ],
+      "review_exercise": "Write one test per query that would have failed on the original version."
+    },
+    {
+      "id": "SQL-010",
+      "title": "Data Cleaning: Standardize Customer Records",
+      "type": "CLEAN",
+      "difficulty": 4,
+      "estimated_minutes": 35,
+      "rubric_ref": "data_cleaning_sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "A staging table contains customer records from three systems. Names have mixed case and stray whitespace; phones appear in four formats; emails have obvious typos; the same person may appear more than once under different spellings.",
+        "create_table_block": "CREATE TABLE staging_customer (\n  raw_id       TEXT,\n  full_name    TEXT,\n  email        TEXT,\n  phone        TEXT,\n  region_code  TEXT,\n  signup_date  TEXT\n);\nCREATE TABLE clean_customer (\n  customer_sk  BIGINT PRIMARY KEY,\n  full_name    TEXT NOT NULL,\n  email        TEXT,\n  phone_e164   TEXT,\n  region_code  TEXT NOT NULL,\n  signup_date  DATE,\n  source_raw_ids TEXT[] NOT NULL\n);",
+        "requirements": [
+          "Produce a cleaned table at one row per real customer",
+          "Standardize case and whitespace",
+          "Normalize phone numbers to a single format (E.164)",
+          "Detect and flag duplicate customers without deleting them",
+          "Preserve raw_id so the original can be traced"
+        ],
+        "tasks": [
+          "Write the cleaning SQL",
+          "State your deduplication rule",
+          "Flag rather than delete ambiguous rows",
+          "Explain one edge case and how you handled it"
+        ],
+        "constraints": ["PostgreSQL-style SQL", "Cleaning must be idempotent"],
+        "deliverables": ["Cleaning SQL", "Deduplication rule statement", "Edge case discussion"]
+      },
+      "internal": {
+        "domains": ["data_cleaning", "sql"],
+        "topics": ["trim", "case_normalization", "regex", "deduplication", "idempotency", "surrogate_key"],
+        "prerequisites": ["sql_001"],
+        "assessment_focus": "The rule must be explicit and the SQL must be safe to re-run.",
+        "common_traps": ["Deleting duplicates without keeping a trail", "Over-aggressive fuzzy matching", "Non-idempotent updates in place"]
+      },
+      "hints": ["Cleaning is a chain of small transformations, not one clever query.", "For deduplication, pick a business key and a survivorship rule; document both.", "Prefer writing cleaned rows to a new table over updating staging in place."],
+      "follow_up_complications": ["A fourth source arrives with a different phone format.", "Two real people share a name and phone but are different customers.", "Some rows have missing signup dates that must be inferred from another table."],
+      "review_exercise": "Rewrite the cleaning as a sequence of pure functions, one per transformation."
+    },
+    {
+      "id": "SQL-011",
+      "title": "Data Cleaning: Parse and Validate Free-Text Fields",
+      "type": "CLEAN",
+      "difficulty": 5,
+      "estimated_minutes": 40,
+      "rubric_ref": "data_cleaning_sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "A legacy table stores addresses, SKUs and dates as free text. You must extract structured fields, validate them, and route invalid rows to a quarantine table with a reason code.",
+        "create_table_block": "CREATE TABLE raw_shipment (\n  shipment_id    TEXT,\n  address_text   TEXT,\n  sku_text       TEXT,\n  ship_date_text TEXT\n);\nCREATE TABLE clean_shipment (\n  shipment_id  TEXT PRIMARY KEY,\n  street       TEXT,\n  city         TEXT,\n  postal_code  TEXT,\n  sku          TEXT,\n  ship_date    DATE\n);\nCREATE TABLE quarantine_shipment (\n  shipment_id TEXT,\n  reason_code TEXT,\n  raw_payload JSONB\n);",
+        "requirements": [
+          "Extract address parts (street, city, postal code)",
+          "Validate SKU format against a pattern",
+          "Convert ship_date_text to a date, flagging impossible dates",
+          "Route invalid rows to a quarantine table with a reason",
+          "Never drop a row silently"
+        ],
+        "tasks": ["Write the extraction SQL", "Write the validation SQL", "Write the quarantine INSERT", "Explain your reason-code taxonomy"],
+        "constraints": ["PostgreSQL-style SQL", "No row may appear in both the clean output and the quarantine"],
+        "deliverables": ["Extraction SQL", "Validation SQL", "Quarantine INSERT", "Reason-code list"]
+      },
+      "internal": {
+        "domains": ["data_cleaning", "sql", "data_quality"],
+        "topics": ["regex_extraction", "string_split", "validation", "quarantine", "reason_codes", "null_handling"],
+        "prerequisites": ["cln_001"],
+        "assessment_focus": "The route must be exhaustive — every row goes somewhere.",
+        "common_traps": ["Silently dropping invalid rows", "One catch-all reason code", "Regex that matches valid rows incorrectly"]
+      },
+      "hints": ["Split the task into extract, validate and route.", "A quarantine table is a first-class output, not a graveyard.", "One reason code per validation rule keeps metrics meaningful."],
+      "follow_up_complications": ["Addresses arrive in two languages.", "SKU pattern changes mid-year.", "Some dates are valid in one calendar but not the target one."],
+      "review_exercise": "Given three invalid rows, assign one reason code each and show the SQL predicate that produced it."
+    },
+    {
+      "id": "SQL-012",
+      "title": "Data Cleaning: Null Handling and Defaults",
+      "type": "CLEAN",
+      "difficulty": 4,
+      "estimated_minutes": 30,
+      "rubric_ref": "data_cleaning_sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "A fact table has NULLs meaning three different things: truly unknown, not applicable, and not yet arrived. Downstream analysts are treating all NULLs the same and misreporting.",
+        "create_table_block": "CREATE TABLE fact_orders (\n  order_id     BIGINT PRIMARY KEY,\n  customer_id  BIGINT,\n  ship_date    DATE,\n  cancel_date  DATE,\n  ship_cost    NUMERIC(12,2),\n  discount_pct NUMERIC(5,4)\n);",
+        "requirements": [
+          "Distinguish the three NULL meanings with explicit handling",
+          "Do not silently replace NULLs with zero",
+          "Handle NULLs in joins safely",
+          "Provide a query that returns correct totals despite NULLs"
+        ],
+        "tasks": [
+          "Classify each NULL column by meaning",
+          "Propose a representation for each meaning",
+          "Write queries that handle NULLs safely",
+          "Write one query that produces a wrong total if NULLs are mishandled, then fix it"
+        ],
+        "constraints": ["PostgreSQL-style SQL", "No use of COALESCE to hide semantics"],
+        "deliverables": ["NULL classification table", "Safe-handling queries", "Wrong-then-right example"]
+      },
+      "internal": {
+        "domains": ["data_cleaning", "sql"],
+        "topics": ["null_semantics", "coalesce", "null_safe_joins", "default_values", "three_valued_logic"],
+        "prerequisites": ["sql_001"],
+        "assessment_focus": "The learner must separate unknown / not applicable / not yet arrived and defend the choice.",
+        "common_traps": ["COALESCE to zero for money", "Equality joins on nullable columns", "Treating NULL as empty string"]
+      },
+      "hints": ["NULL is not a value; give each meaning its own representation.", "For 'not yet arrived', an explicit flag or an event timestamp is usually better than NULL.", "Test your query against three rows: unknown, not applicable, not yet arrived."],
+      "follow_up_complications": ["Downstream BI tool cannot represent a tri-state flag.", "A source starts sending empty strings instead of NULLs.", "A regulatory report must distinguish unknown from zero."],
+      "review_exercise": "Write three test rows and show which ones your query treats as unknown, not applicable and not yet arrived."
+    },
+    {
+      "id": "CM-001",
+      "title": "Conceptual Model for a Hospital Appointment Domain",
+      "type": "CONCEPTUAL",
+      "difficulty": 3,
+      "estimated_minutes": 30,
+      "rubric_ref": "conceptual_modeling",
+      "artifacts_required": ["diagram_drawn", "prose"],
+      "student": {
+        "scenario": "A hospital describes its world in plain English: patients book appointments with doctors; a doctor works in one or more clinics and has one or more specialties; each appointment may result in zero or more procedures; each procedure is performed by a doctor and belongs to a specialty. Every appointment has a date, a status and a reason.",
+        "requirements": [
+          "Produce a conceptual (ER) model only — no tables, no data types, no foreign keys",
+          "Show every entity, its identifying attributes and its descriptive attributes",
+          "Show every relationship with cardinality (1:1, 1:N, M:N)",
+          "Show optionality (mandatory vs optional participation) on each side",
+          "Explain one abstraction decision you made and one you rejected"
+        ],
+        "tasks": ["List candidate entities and prune them", "Identify relationships and their cardinality", "Draw the ER diagram (Chen notation preferred; crow's foot acceptable)", "Annotate cardinality and optionality", "Write a short paragraph justifying one M:N relationship"],
+        "constraints": ["Do not use table names, column names or SQL keywords", "The diagram must be readable without a legend longer than five lines"],
+        "deliverables": ["One conceptual ER diagram", "Entity and relationship list", "Cardinality/optionality annotations", "Abstraction justification"]
+      },
+      "internal": {
+        "domains": ["conceptual_modeling", "database_design"],
+        "topics": ["entity", "relationship", "cardinality", "optionality", "many_to_many", "abstraction"],
+        "prerequisites": ["entities", "cardinality"],
+        "assessment_focus": "The learner must resist jumping to tables and must express cardinality and optionality clearly.",
+        "common_traps": ["Putting foreign keys in a conceptual model", "Using table names instead of entity names", "Omitting optionality", "Collapsing doctor-specialty M:N into a single attribute"]
+      },
+      "hints": ["A conceptual model describes the business, not the database.", "If a doctor can have many specialties and a specialty many doctors, that is a relationship, not an attribute.", "Optionality answers 'must every X participate in this relationship?'"],
+      "follow_up_complications": ["Add insurance policies that cover only selected procedures.", "A patient can be referred by another doctor.", "Appointments can be rescheduled and the original slot must be remembered."],
+      "review_exercise": "Redraw the same domain with the opposite abstraction choice for one entity and explain what changes."
+    },
+    {
+      "id": "CM-002",
+      "title": "Conceptual Model vs Logical Model for a Library",
+      "type": "CONCEPTUAL",
+      "difficulty": 3,
+      "estimated_minutes": 35,
+      "rubric_ref": "conceptual_modeling",
+      "artifacts_required": ["diagram_drawn", "table_ddl", "prose"],
+      "student": {
+        "scenario": "A library lends physical copies of titles to members. A title may have many authors and many physical copies; copies live in branches and can move; members borrow copies many times.",
+        "requirements": [
+          "Produce BOTH a conceptual model (entities/relationships) and a logical model (tables, columns, keys)",
+          "The logical model must not use SQL types yet — only logical types (identifier, text, date)",
+          "Explicitly show how each M:N in the conceptual model became a table in the logical model",
+          "Justify any new entity you introduced between the two levels"
+        ],
+        "tasks": ["Draw the conceptual ER", "Produce the logical schema", "Draw a mapping table: conceptual element -> logical element", "Explain one thing the conceptual model deliberately left out"],
+        "constraints": ["No physical types in the logical model", "No surrogate keys in the conceptual model"],
+        "deliverables": ["Conceptual ER diagram", "Logical schema", "Conceptual-to-logical mapping table", "Justification paragraph"]
+      },
+      "internal": {
+        "domains": ["conceptual_modeling", "logical_modeling"],
+        "topics": ["entity", "relationship", "association_table", "logical_types", "candidate_key"],
+        "prerequisites": ["cm_001"],
+        "assessment_focus": "The learner should show the conceptual-to-logical translation explicitly, not just hand over two diagrams.",
+        "common_traps": ["Copying the conceptual diagram and renaming it 'logical'", "Introducing SQL types in the logical model", "Forgetting the copy-location history"]
+      },
+      "hints": ["Conceptual answers 'what exists'; logical answers 'how is it represented as tables and keys'.", "Every M:N in the conceptual model usually becomes an association table in the logical model.", "Some concepts appear only at the logical level — say so out loud."],
+      "follow_up_complications": ["Members can reserve a title instead of a specific copy.", "Fines can be waived and the waiver needs to be remembered.", "Rare items may not have an ISBN."],
+      "review_exercise": "Take one M:N relationship and write both its conceptual form and its logical form in one sentence each."
+    },
+    {
+      "id": "CM-003",
+      "title": "Draw the Star: Retail Sales",
+      "type": "CONCEPTUAL",
+      "difficulty": 3,
+      "estimated_minutes": 30,
+      "rubric_ref": "conceptual_modeling",
+      "artifacts_required": ["diagram_drawn", "prose"],
+      "student": {
+        "scenario": "A retailer wants to analyze sales by date, product, store, promotion and customer. Products belong to categories that change over time. Stores belong to regions that are reorganized. A single sale line can have multiple promotions.",
+        "requirements": [
+          "Draw a star schema diagram",
+          "Label the grain of the fact table in one sentence",
+          "Label each measure as additive, semi-additive or non-additive",
+          "Annotate each dimension with its SCD type where history is needed",
+          "Show where the many-to-many promotion relationship is handled"
+        ],
+        "tasks": ["Identify the business process and grain", "Choose fact table(s)", "List dimensions and their SCD types", "Draw the star diagram", "Annotate the diagram with grain and measure behavior"],
+        "constraints": ["One fact table is expected; if you need more, justify it", "No SQL types on the diagram"],
+        "deliverables": ["Star schema diagram with annotations", "Grain statement", "Measure additivity list", "SCD type per dimension"]
+      },
+      "internal": {
+        "domains": ["dimensional_modeling"],
+        "topics": ["star_schema", "grain", "additivity", "scd_type_2", "bridge_table"],
+        "prerequisites": ["dm_001"],
+        "assessment_focus": "The learner must produce a readable diagram with grain, measures and SCD types all visible.",
+        "common_traps": ["Snowflaking without reason", "No grain statement on the diagram", "Promotions joined directly instead of via a bridge"]
+      },
+      "hints": ["Every star begins with a grain statement, not a diagram.", "A diagram without grain and measure labels is not yet a star schema design.", "M:N between fact and a dimension needs a bridge, not a direct join."],
+      "follow_up_complications": ["Add returns that must reconcile to original sale lines.", "Add an employee dimension that also participates in a separate labor fact.", "Reorganize the product hierarchy and keep both the historical and current views."],
+      "review_exercise": "Redraw the star with every dimension labelled 'SCD1', 'SCD2' or 'static' and defend each choice in one line."
+    },
+    {
+      "id": "CM-004",
+      "title": "Draw the Lineage: Source to Mart",
+      "type": "CONCEPTUAL",
+      "difficulty": 4,
+      "estimated_minutes": 35,
+      "rubric_ref": "conceptual_modeling",
+      "artifacts_required": ["diagram_drawn", "prose"],
+      "student": {
+        "scenario": "You are given four sources (an OLTP orders database, a CSV of exchange rates, a JSON web-events stream and a REST CRM API) and two marts (finance revenue, marketing funnels). Design and draw the data lineage from sources to marts.",
+        "requirements": [
+          "Draw one diagram showing every source, every layer and every mart",
+          "Label each edge with what moves across it (rows, files, events) and the frequency",
+          "Label each node as raw, staging, integrated, curated or serving",
+          "Mark where data quality checks live",
+          "Mark where PII is masked or removed"
+        ],
+        "tasks": ["List nodes and layers", "List edges with payload and cadence", "Draw the lineage diagram", "Annotate quality and privacy controls"],
+        "constraints": ["No vendor names required", "Every node must be labelled with its layer"],
+        "deliverables": ["Lineage diagram", "Node and edge list", "Quality and privacy annotations"]
+      },
+      "internal": {
+        "domains": ["data_architecture", "governance"],
+        "topics": ["lineage_layers", "raw_staging_curated_serving", "data_lineage", "data_quality", "pii_masking"],
+        "prerequisites": ["arch_001"],
+        "assessment_focus": "The diagram must be complete and readable; every source must reach its intended mart.",
+        "common_traps": ["Nodes without layer labels", "Edges without cadence", "No privacy control shown"]
+      },
+      "hints": ["Lineage is about direction and payload, not about tools.", "Mark the layer of every node so a reviewer can see the pipeline shape at a glance.", "Privacy and quality are controls on nodes or edges — show them on the diagram."],
+      "follow_up_complications": ["Add a late-arriving source that must not block the finance mart.", "Add a regulatory deletion flow that must propagate to the marketing mart.", "Split one source into two feeds with different SLAs."],
+      "review_exercise": "Redraw the lineage for one mart only, in both source-to-mart and mart-to-source direction."
+    },
+    {
+      "id": "LM-001",
+      "title": "Logical to Physical: Order Management DDL",
+      "type": "PHYSICAL",
+      "difficulty": 4,
+      "estimated_minutes": 40,
+      "rubric_ref": "logical_physical_modeling",
+      "artifacts_required": ["table_ddl", "prose", "matrix"],
+      "student": {
+        "scenario": "You are given this logical model: Customer(customer_id, name, email, region_code), Order(order_id, customer_id, order_date, status), OrderLine(order_id, line_number, product_id, quantity, unit_price, discount_pct), Product(product_id, name, category_id, list_price), Category(category_id, name, parent_category_id).",
+        "requirements": [
+          "Write CREATE TABLE DDL for every table",
+          "Choose a data type for every column and justify non-obvious choices",
+          "Declare primary keys, foreign keys, NOT NULL constraints, CHECK constraints and UNIQUE constraints",
+          "Add at least two indexes and justify each",
+          "State which surrogate keys you would introduce and why"
+        ],
+        "tasks": ["Translate the logical model to physical DDL", "Choose types for monetary, percentage and identifier columns", "Add constraints", "Add indexes", "Write a short justification per non-obvious decision"],
+        "constraints": ["Use PostgreSQL-compatible SQL", "Use NUMERIC for money, not FLOAT", "discount_pct must be between 0 and 1"],
+        "deliverables": ["Full DDL script", "Type justification table", "Index justification list"]
+      },
+      "internal": {
+        "domains": ["logical_modeling", "physical_modeling", "relational_databases"],
+        "topics": ["ddl", "data_types", "numeric_precision", "monetary_precision", "check_constraint", "foreign_key", "indexing", "surrogate_key"],
+        "prerequisites": ["norm_001"],
+        "assessment_focus": "Every column must have a deliberate type and every constraint a stated purpose.",
+        "common_traps": ["FLOAT for money", "VARCHAR(255) everywhere", "No FK constraints", "Indexing every column"]
+      },
+      "hints": ["Money needs exact arithmetic; float does not give you that.", "Constraints belong next to the data, not only in application code.", "Indexes cost write throughput — justify each one against a query pattern."],
+      "follow_up_complications": ["Add soft-delete semantics for customers.", "Add multi-tenant isolation by tenant_id.", "Add temporal validity to the product price."],
+      "review_exercise": "Rewrite one CREATE TABLE using the smallest set of constraints that still enforces the business rules."
+    },
+    {
+      "id": "LM-002",
+      "title": "Physical Design Tradeoffs for a Large Fact Table",
+      "type": "PHYSICAL",
+      "difficulty": 5,
+      "estimated_minutes": 40,
+      "rubric_ref": "logical_physical_modeling",
+      "artifacts_required": ["table_ddl", "matrix", "prose"],
+      "student": {
+        "scenario": "FactSales(DateKey, ProductKey, StoreKey, CustomerKey, PromotionKey, Quantity, GrossRevenue, DiscountAmount, NetRevenue, CostAmount) has 4 billion rows and grows by 15 million rows per day. Queries almost always filter by date range and then by store or product.",
+        "requirements": ["Choose partitioning strategy", "Choose clustering / sort keys", "Choose compression strategy", "Choose distribution strategy (if you assume a distributed engine)", "Justify each choice against the query patterns"],
+        "tasks": ["List the dominant query patterns", "Propose partitioning and clustering", "Propose compression per column group", "Propose distribution", "Fill a decision matrix: option, benefit, cost, why"],
+        "constraints": ["No vendor lock-in required — state assumptions", "Every choice must reference a query pattern"],
+        "deliverables": ["DDL with partition and cluster clauses", "Decision matrix", "Assumptions paragraph"]
+      },
+      "internal": {
+        "domains": ["physical_modeling", "performance"],
+        "topics": ["partitioning", "clustering", "compression", "distribution", "columnar_storage", "predicate_pushdown"],
+        "prerequisites": ["lm_001"],
+        "assessment_focus": "Every physical choice must be tied to a query pattern and its cost.",
+        "common_traps": ["Partitioning on high-cardinality surrogate keys", "Clustering on a column never used in filters", "No statement of assumptions"]
+      },
+      "hints": ["Partitioning is for pruning; clustering is for co-locating rows read together.", "A 4-billion-row fact is not a candidate for row-store unless queries return tiny slices.", "State your engine assumptions before proposing distribution."],
+      "follow_up_complications": ["Add a late-arriving data window of 7 days that must be re-ingested daily.", "Add a second workload that scans one customer across all dates.", "Compress raw event data for 90 days, keep aggregates for 5 years."],
+      "review_exercise": "Given two query patterns, propose one physical design that serves both and name the tradeoff."
+    },
+    {
+      "id": "CLN-001",
+      "title": "Clean a Dirty Customer Staging Table",
+      "type": "CLEAN",
+      "difficulty": 4,
+      "estimated_minutes": 35,
+      "rubric_ref": "data_cleaning_sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "You are given a staging table of customer records loaded from three systems. Names have mixed case and trailing spaces; phone numbers appear in four formats; emails have obvious typos; the same person may appear more than once under different spellings; region codes are inconsistent.",
+        "create_table_block": "CREATE TABLE staging_customer (\n  raw_id       TEXT,\n  full_name    TEXT,\n  email        TEXT,\n  phone        TEXT,\n  region_code  TEXT,\n  signup_date  TEXT\n);",
+        "requirements": ["Produce a cleaned table at one row per real customer", "Standardize case and whitespace", "Normalize phone numbers to a single format", "Detect and flag duplicate customers without deleting them", "Preserve raw_id so the original can be traced"],
+        "tasks": ["Write the cleaning SQL", "State your deduplication rule", "Flag rather than delete ambiguous rows", "Explain one edge case and how you handled it"],
+        "constraints": ["PostgreSQL-style SQL", "Cleaning must be idempotent (running it twice produces the same result)"],
+        "deliverables": ["Cleaning SQL", "Deduplication rule statement", "Edge case discussion"]
+      },
+      "internal": {
+        "domains": ["data_cleaning", "sql"],
+        "topics": ["trim", "case_normalization", "regex", "deduplication", "idempotency", "surrogate_key"],
+        "prerequisites": ["sql_001"],
+        "assessment_focus": "The rule must be explicit and the SQL must be safe to re-run.",
+        "common_traps": ["Deleting duplicates without keeping a trail", "Over-aggressive fuzzy matching", "Non-idempotent updates in place"]
+      },
+      "hints": ["Cleaning is a chain of small transformations, not one clever query.", "For deduplication, pick a business key and a survivorship rule; document both.", "Prefer writing cleaned rows to a new table over updating staging in place."],
+      "follow_up_complications": ["A fourth source arrives with a different phone format.", "Two real people share a name and phone but are different customers.", "Some rows have missing signup dates that must be inferred from another table."],
+      "review_exercise": "Rewrite the cleaning as a sequence of pure functions, one per transformation."
+    },
+    {
+      "id": "CLN-002",
+      "title": "Parse and Validate Free-Text Fields",
+      "type": "CLEAN",
+      "difficulty": 5,
+      "estimated_minutes": 40,
+      "rubric_ref": "data_cleaning_sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "A legacy table stores addresses, SKUs and dates as free text. You must extract structured fields, validate them, and route invalid rows to a quarantine table with a reason code.",
+        "create_table_block": "CREATE TABLE raw_shipment (\n  shipment_id    TEXT,\n  address_text   TEXT,\n  sku_text       TEXT,\n  ship_date_text TEXT\n);",
+        "requirements": ["Extract address parts (street, city, postal code)", "Validate SKU format against a pattern", "Convert ship_date_text to a date, flagging impossible dates", "Route invalid rows to a quarantine table with a reason", "Never drop a row silently"],
+        "tasks": ["Write the extraction SQL", "Write the validation SQL", "Write the quarantine INSERT", "Explain your reason-code taxonomy"],
+        "constraints": ["PostgreSQL-style SQL", "No row may appear in both the clean output and the quarantine"],
+        "deliverables": ["Extraction SQL", "Validation SQL", "Quarantine INSERT", "Reason-code list"]
+      },
+      "internal": {
+        "domains": ["data_cleaning", "sql", "data_quality"],
+        "topics": ["regex_extraction", "string_split", "validation", "quarantine", "reason_codes", "null_handling"],
+        "prerequisites": ["cln_001"],
+        "assessment_focus": "The route must be exhaustive — every row goes somewhere.",
+        "common_traps": ["Silently dropping invalid rows", "One catch-all reason code", "Regex that matches valid rows incorrectly"]
+      },
+      "hints": ["Split the task into extract, validate and route.", "A quarantine table is a first-class output, not a graveyard.", "One reason code per validation rule keeps metrics meaningful."],
+      "follow_up_complications": ["Addresses arrive in two languages.", "SKU pattern changes mid-year.", "Some dates are valid in one calendar but not the target one."],
+      "review_exercise": "Given three invalid rows, assign one reason code each and show the SQL predicate that produced it."
+    },
+    {
+      "id": "CLN-003",
+      "title": "Null Handling and Defaults",
+      "type": "CLEAN",
+      "difficulty": 4,
+      "estimated_minutes": 30,
+      "rubric_ref": "data_cleaning_sql",
+      "artifacts_required": ["query_sql", "prose"],
+      "student": {
+        "scenario": "A fact table has NULLs meaning three different things: truly unknown, not applicable, and not yet arrived. Downstream analysts are treating all NULLs the same and misreporting.",
+        "create_table_block": "CREATE TABLE fact_orders (\n  order_id     BIGINT,\n  customer_id  BIGINT,\n  ship_date    DATE,\n  cancel_date  DATE,\n  ship_cost    NUMERIC(12,2),\n  discount_pct NUMERIC(5,4)\n);",
+        "requirements": ["Distinguish the three NULL meanings with explicit handling", "Do not silently replace NULLs with zero", "Handle NULLs in joins safely", "Provide a query that returns correct totals despite NULLs"],
+        "tasks": ["Classify each NULL column by meaning", "Propose a representation for each meaning", "Write queries that handle NULLs safely", "Write one query that produces a wrong total if NULLs are mishandled, then fix it"],
+        "constraints": ["PostgreSQL-style SQL", "No use of COALESCE to hide semantics"],
+        "deliverables": ["NULL classification table", "Safe-handling queries", "Wrong-then-right example"]
+      },
+      "internal": {
+        "domains": ["data_cleaning", "sql"],
+        "topics": ["null_semantics", "coalesce", "null_safe_joins", "default_values", "three_valued_logic"],
+        "prerequisites": ["sql_001"],
+        "assessment_focus": "The learner must separate unknown / not applicable / not yet arrived and defend the choice.",
+        "common_traps": ["COALESCE to zero for money", "Equality joins on nullable columns", "Treating NULL as empty string"]
+      },
+      "hints": ["NULL is not a value; give each meaning its own representation.", "For 'not yet arrived', an explicit flag or an event timestamp is usually better than NULL.", "Test your query against three rows: unknown, not applicable, not yet arrived."],
+      "follow_up_complications": ["Downstream BI tool cannot represent a tri-state flag.", "A source starts sending empty strings instead of NULLs.", "A regulatory report must distinguish unknown from zero."],
+      "review_exercise": "Write three test rows and show which ones your query treats as unknown, not applicable and not yet arrived."
+    },
+    {
+      "id": "BIZ-001",
+      "title": "Invent a Business: Ride-Sharing Startup",
+      "type": "GREENFIELD",
+      "difficulty": 4,
+      "estimated_minutes": 60,
+      "rubric_ref": "greenfield_design",
+      "artifacts_required": ["prose", "diagram_drawn", "table_ddl"],
+      "student": {
+        "scenario": "You are the first data engineer at a new ride-sharing startup. No schema exists, no sources are defined, no reporting exists. You must invent the business, define its processes and produce the first end-to-end design.",
+        "requirements": [
+          "Define the business: who are the customers, what does the company sell, what makes it different from a generic ride-share",
+          "Define at least three business processes and the KPIs that matter for each",
+          "Produce a conceptual model of the core domain",
+          "Produce a logical model of the operational database",
+          "Produce a star schema design for one analytical process",
+          "State the grain of each fact table",
+          "Justify one design decision you would defend in an architecture review"
+        ],
+        "tasks": [
+          "Write a one-paragraph business description",
+          "List business processes and KPIs",
+          "Draw a conceptual ER for the core domain",
+          "Produce a logical schema",
+          "Design one star schema with grain and dimensions",
+          "Write a short defense paragraph"
+        ],
+        "constraints": [
+          "You choose the domain details; keep them internally consistent",
+          "The star schema must be justified by at least one stated reporting question"
+        ],
+        "deliverables": [
+          "Business description",
+          "Process and KPI list",
+          "Conceptual ER diagram",
+          "Logical schema",
+          "One star schema with grain statement",
+          "Design defense paragraph"
+        ]
+      },
+      "internal": {
+        "domains": ["greenfield_design", "conceptual_modeling", "dimensional_modeling"],
+        "topics": ["domain_discovery", "greenfield_design", "conceptual_model", "logical_model", "star_schema", "grain"],
+        "prerequisites": ["cm_001", "dm_001"],
+        "assessment_focus": "Internal consistency across the business description, conceptual model, logical model and star schema.",
+        "common_traps": ["Generic business description", "Conceptual and logical models that disagree", "Star schema without a stated reporting question", "No grain statement"]
+      },
+      "hints": [
+        "Start with the business, not with the tables.",
+        "Every KPI needs a process and a grain.",
+        "Your star schema must answer one specific reporting question — write that question down before drawing."
+      ],
+      "follow_up_complications": [
+        "Add a second city with different pricing rules.",
+        "Add a loyalty program with tiered discounts.",
+        "Regulators require driver earnings reports by hour and city."
+      ],
+      "review_exercise": "Rewrite the business description in one sentence and check that every model you produced supports it."
+    },
+    {
+      "id": "BIZ-002",
+      "title": "Invent a Business: Subscription Coffee Roastery",
+      "type": "GREENFIELD",
+      "difficulty": 5,
+      "estimated_minutes": 75,
+      "rubric_ref": "greenfield_design",
+      "artifacts_required": ["prose", "diagram_drawn", "table_ddl", "query_sql"],
+      "student": {
+        "scenario": "You are hired as the first data engineer at a subscription coffee roastery. The company roasts, ships and bills subscribers monthly. You must invent the operational detail, then produce the full modeling chain: conceptual, logical, physical and one analytical query.",
+        "requirements": [
+          "Define the business: subscription tiers, billing cadence, shipping model, roasting batches",
+          "Define at least four business processes with their grains",
+          "Produce a conceptual ER for the operational domain",
+          "Produce a logical schema",
+          "Produce physical DDL for the operational schema with types, keys and constraints",
+          "Produce a star schema for one analytical process",
+          "Write one analytical SQL query against your star schema",
+          "Justify one tradeoff in your design"
+        ],
+        "tasks": [
+          "Write a short business description",
+          "List business processes and grains",
+          "Draw the conceptual ER",
+          "Produce logical and physical models",
+          "Design one star schema with grain",
+          "Write one SQL query against it",
+          "Write a short tradeoff justification"
+        ],
+        "constraints": [
+          "Physical DDL must use NUMERIC for money, DATE/TIMESTAMP for time, and explicit constraints",
+          "The analytical query must be valid PostgreSQL and reference only tables you defined",
+          "Every business process must appear in either the operational or analytical model — no orphan processes"
+        ],
+        "deliverables": [
+          "Business description",
+          "Process and grain list",
+          "Conceptual ER diagram",
+          "Logical schema",
+          "Physical DDL script",
+          "Star schema diagram",
+          "One analytical SQL query",
+          "Tradeoff justification"
+        ]
+      },
+      "internal": {
+        "domains": ["greenfield_design", "conceptual_modeling", "logical_modeling", "physical_modeling", "dimensional_modeling", "sql"],
+        "topics": ["domain_discovery", "greenfield_design", "conceptual_model", "logical_model", "physical_model", "ddl", "star_schema", "grain", "query_sql"],
+        "prerequisites": ["biz_001", "lm_001"],
+        "assessment_focus": "Coherence across all four levels: business, conceptual, logical/physical, analytical.",
+        "common_traps": [
+          "Processes without grains",
+          "Physical model inconsistent with logical model",
+          "Analytical query that does not match the star schema grain",
+          "No tradeoff stated"
+        ]
+      },
+      "hints": [
+        "The four modeling levels must agree with each other; walk each one through the same business sentence.",
+        "Physical DDL should not introduce new entities the logical model did not have.",
+        "Your analytical query is the proof that your star schema works — write the query before finalizing the diagram."
+      ],
+      "follow_up_complications": [
+        "Add a wholesale channel with different pricing.",
+        "Add a pause/resume feature to subscriptions.",
+        "Regulators require monthly allergen traceability per roast batch."
+      ],
+      "review_exercise": "Walk one business sentence (e.g. 'a subscriber receives a bag of roasted coffee') through all four model levels and check that each level represents it."
+    }
+  ]
+}
