@@ -25,3 +25,10 @@ def test_new_bank_families_are_selectable():
     candidates=eligible_challenges(bank_data["challenges"],family="DM")
     assert len(candidates)==6
     assert all(c["id"].startswith("DM-") for c in candidates)
+
+
+def test_adaptive_recency_uses_latest_repeat():
+    candidates=[{"id":cid,"difficulty":3} for cid in ("A","B")]
+    history=[{"challenge_id":cid} for cid in ("A","B","B","A")]
+    # Equal coverage and difficulty: B was last practiced earlier than A.
+    assert select_challenge(candidates,history,adaptive=True,seed=0)["id"]=="B"

@@ -8,3 +8,7 @@ database/*.db
 data/imports
 data/versions
 tests
+erd_frontend/node_modules
+erd_frontend/dist
+.runtime-deps
+.test-runtime

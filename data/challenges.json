@@ -2501,7 +2501,8 @@
         "A privacy request removes a user's web events.",
         "Finance wants results under both original and current attribution rules."
       ],
-      "review_exercise": "Write the weight-sum rule for one sale and check it against three touchpoints."
+      "review_exercise": "Write the weight-sum rule for one sale and check it against three touchpoints.",
+      "diagram_kind": "logical_erd"
     },
     {
       "id": "DM-003",
@@ -2994,7 +2995,8 @@
         "An item can have editors as well as authors.",
         "Fines can be adjusted and waived."
       ],
-      "review_exercise": "Draw the ER for the normalized library and label every cardinality."
+      "review_exercise": "Draw the ER for the normalized library and label every cardinality.",
+      "diagram_kind": "logical_erd"
     },
     {
       "id": "ARCH-001",
@@ -3913,27 +3915,23 @@
       ],
       "student": {
         "scenario": "Return the top three products by net revenue in each region for the previous completed calendar quarter, using the tables below.",
-        "create_table_block": "CREATE TABLE FactSales (\n  DateKey      INT     NOT NULL,\n  ProductKey   INT     NOT NULL,\n  StoreKey     INT     NOT NULL,\n  Quantity     INT     NOT NULL,\n  NetRevenue   NUMERIC(14,2) NOT NULL,\n  SaleStatus   TEXT    NOT NULL\n);\nCREATE TABLE DimDate (\n  DateKey      INT     PRIMARY KEY,\n  FullDate     DATE    NOT NULL,\n  Quarter      INT     NOT NULL,\n  Year         INT     NOT NULL\n);\nCREATE TABLE DimProduct (\n  ProductKey   INT     PRIMARY KEY,\n  ProductName  TEXT    NOT NULL,\n  CategoryName TEXT    NOT NULL\n);\nCREATE TABLE DimStore (\n  StoreKey     INT     PRIMARY KEY,\n  StoreName    TEXT    NOT NULL,\n  RegionName   TEXT    NOT NULL\n);",
+        "create_table_block": "CREATE TABLE \"exercise_context\" (\n  \"as_of_date\" DATE NOT NULL\n);\n\nCREATE TABLE \"DimDate\" (\n  \"DateKey\" INTEGER NOT NULL,\n  \"FullDate\" DATE NOT NULL\n);\n\nCREATE TABLE \"DimProduct\" (\n  \"ProductKey\" INTEGER NOT NULL,\n  \"ProductName\" VARCHAR NOT NULL\n);\n\nCREATE TABLE \"DimStore\" (\n  \"StoreKey\" INTEGER NOT NULL,\n  \"RegionName\" VARCHAR NOT NULL\n);\n\nCREATE TABLE \"FactSales\" (\n  \"DateKey\" INTEGER NOT NULL,\n  \"ProductKey\" INTEGER NOT NULL,\n  \"StoreKey\" INTEGER NOT NULL,\n  \"NetRevenue\" DECIMAL(14,2) NOT NULL,\n  \"SaleStatus\" VARCHAR NOT NULL\n);",
         "requirements": [
-          "Include ties",
-          "Exclude returned/cancelled lines using SaleStatus",
-          "Do not hard-code quarter dates",
-          "Show region, product, revenue and rank"
+          "Return the top three distinct revenue ranks per region, including ties. Only completed lines count. Derive the previous completed calendar quarter from exercise_context.as_of_date. Sort by region, rank, product."
         ],
         "tasks": [
-          "Write the SQL",
-          "Explain the date boundary",
-          "Explain the ranking function",
-          "Identify indexes or physical design that could help"
+          "Regional ranking: produce the declared output columns.",
+          "Explain correctness, edge cases, and production-scale performance separately."
         ],
         "constraints": [
-          "SQL dialect may be PostgreSQL or explained pseudocode",
-          "FactSales has 800 million rows"
+          "Executable dialect: DuckDB 1.5.5. One SELECT (including CTEs) per answer tab.",
+          "The local dataset is intentionally small; runtime does not establish production-scale performance.",
+          "Checks assess result correctness only. Output names, types, precision, and ordering are specified in the workspace.",
+          "Production context for your written performance discussion: 800 million sales lines."
         ],
         "deliverables": [
-          "Query",
-          "Short correctness explanation",
-          "Performance notes"
+          "Regional ranking SQL",
+          "Written reasoning and performance notes"
         ]
       },
       "internal": {
@@ -3971,7 +3969,485 @@
         "Use fiscal quarters beginning in February.",
         "Return only products that ranked in the top three in at least two consecutive quarters."
       ],
-      "review_exercise": "Write the aggregate CTE and the ranking CTE as two separate statements, then combine them."
+      "review_exercise": "Write the aggregate CTE and the ranking CTE as two separate statements, then combine them.",
+      "sql_playground": {
+        "version": 1,
+        "dialect": "duckdb",
+        "tables": [
+          {
+            "name": "exercise_context",
+            "description": "One reproducible business reporting date; derive boundaries from this row.",
+            "columns": [
+              {
+                "name": "as_of_date",
+                "type": "DATE",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          },
+          {
+            "name": "DimDate",
+            "description": "Calendar dates.",
+            "columns": [
+              {
+                "name": "DateKey",
+                "type": "INTEGER",
+                "nullable": false,
+                "key": "Primary key"
+              },
+              {
+                "name": "FullDate",
+                "type": "DATE",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          },
+          {
+            "name": "DimProduct",
+            "description": "Product catalogue.",
+            "columns": [
+              {
+                "name": "ProductKey",
+                "type": "INTEGER",
+                "nullable": false,
+                "key": "Primary key"
+              },
+              {
+                "name": "ProductName",
+                "type": "VARCHAR",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          },
+          {
+            "name": "DimStore",
+            "description": "Store to region mapping.",
+            "columns": [
+              {
+                "name": "StoreKey",
+                "type": "INTEGER",
+                "nullable": false,
+                "key": "Primary key"
+              },
+              {
+                "name": "RegionName",
+                "type": "VARCHAR",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          },
+          {
+            "name": "FactSales",
+            "description": "Sales lines; NetRevenue already accounts for quantity and discounts.",
+            "columns": [
+              {
+                "name": "DateKey",
+                "type": "INTEGER",
+                "nullable": false,
+                "key": "References DimDate"
+              },
+              {
+                "name": "ProductKey",
+                "type": "INTEGER",
+                "nullable": false,
+                "key": "References DimProduct"
+              },
+              {
+                "name": "StoreKey",
+                "type": "INTEGER",
+                "nullable": false,
+                "key": "References DimStore"
+              },
+              {
+                "name": "NetRevenue",
+                "type": "DECIMAL(14,2)",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "SaleStatus",
+                "type": "VARCHAR",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          }
+        ],
+        "visible_fixture": {
+          "exercise_context": [
+            [
+              "2026-05-15"
+            ]
+          ],
+          "DimDate": [
+            [
+              1,
+              "2026-01-01"
+            ],
+            [
+              2,
+              "2026-03-31"
+            ],
+            [
+              3,
+              "2026-04-01"
+            ],
+            [
+              4,
+              "2025-12-31"
+            ]
+          ],
+          "DimProduct": [
+            [
+              1,
+              "Notebook"
+            ],
+            [
+              2,
+              "Monitor"
+            ],
+            [
+              3,
+              "Keyboard"
+            ],
+            [
+              4,
+              "Mouse"
+            ],
+            [
+              5,
+              "Dock"
+            ]
+          ],
+          "DimStore": [
+            [
+              1,
+              "North"
+            ],
+            [
+              2,
+              "South"
+            ],
+            [
+              3,
+              "North"
+            ]
+          ],
+          "FactSales": [
+            [
+              1,
+              1,
+              1,
+              "100.00",
+              "completed"
+            ],
+            [
+              2,
+              1,
+              3,
+              "50.00",
+              "completed"
+            ],
+            [
+              1,
+              2,
+              1,
+              "120.00",
+              "completed"
+            ],
+            [
+              1,
+              3,
+              1,
+              "100.00",
+              "completed"
+            ],
+            [
+              2,
+              4,
+              1,
+              "100.00",
+              "completed"
+            ],
+            [
+              2,
+              5,
+              1,
+              "80.00",
+              "completed"
+            ],
+            [
+              1,
+              1,
+              2,
+              "30.00",
+              "completed"
+            ],
+            [
+              3,
+              5,
+              1,
+              "999.00",
+              "completed"
+            ],
+            [
+              4,
+              5,
+              1,
+              "999.00",
+              "completed"
+            ],
+            [
+              2,
+              5,
+              1,
+              "800.00",
+              "cancelled"
+            ],
+            [
+              1,
+              5,
+              1,
+              "900.00",
+              "returned"
+            ]
+          ]
+        },
+        "tasks": [
+          {
+            "id": "ranking",
+            "title": "Regional ranking",
+            "description": "Return the top three distinct revenue ranks per region, including ties. Only completed lines count. Derive the previous completed calendar quarter from exercise_context.as_of_date. Sort by region, rank, product.",
+            "columns": [
+              {
+                "name": "region",
+                "type": "string"
+              },
+              {
+                "name": "product",
+                "type": "string"
+              },
+              {
+                "name": "revenue",
+                "type": "decimal",
+                "scale": 2
+              },
+              {
+                "name": "rank",
+                "type": "integer"
+              }
+            ],
+            "ordered": true
+          }
+        ],
+        "assessment": {
+          "fixtures": [
+            {
+              "exercise_context": [
+                [
+                  "2026-05-15"
+                ]
+              ],
+              "DimDate": [
+                [
+                  1,
+                  "2026-01-01"
+                ],
+                [
+                  2,
+                  "2026-03-31"
+                ],
+                [
+                  3,
+                  "2026-04-01"
+                ],
+                [
+                  4,
+                  "2025-12-31"
+                ]
+              ],
+              "DimProduct": [],
+              "DimStore": [],
+              "FactSales": []
+            },
+            {
+              "exercise_context": [
+                [
+                  "2026-04-01"
+                ]
+              ],
+              "DimDate": [
+                [
+                  1,
+                  "2026-01-01"
+                ],
+                [
+                  2,
+                  "2026-03-31"
+                ],
+                [
+                  3,
+                  "2026-04-01"
+                ],
+                [
+                  4,
+                  "2025-12-31"
+                ]
+              ],
+              "DimProduct": [
+                [
+                  1,
+                  "Notebook"
+                ],
+                [
+                  2,
+                  "Monitor"
+                ],
+                [
+                  3,
+                  "Keyboard"
+                ],
+                [
+                  4,
+                  "Mouse"
+                ],
+                [
+                  5,
+                  "Dock"
+                ]
+              ],
+              "DimStore": [
+                [
+                  1,
+                  "North"
+                ],
+                [
+                  2,
+                  "South"
+                ],
+                [
+                  3,
+                  "North"
+                ]
+              ],
+              "FactSales": [
+                [
+                  1,
+                  1,
+                  1,
+                  "100.00",
+                  "completed"
+                ],
+                [
+                  2,
+                  1,
+                  3,
+                  "50.00",
+                  "completed"
+                ],
+                [
+                  1,
+                  2,
+                  1,
+                  "120.00",
+                  "completed"
+                ],
+                [
+                  1,
+                  3,
+                  1,
+                  "100.00",
+                  "completed"
+                ],
+                [
+                  2,
+                  4,
+                  1,
+                  "100.00",
+                  "completed"
+                ],
+                [
+                  2,
+                  5,
+                  1,
+                  "80.00",
+                  "completed"
+                ],
+                [
+                  1,
+                  1,
+                  2,
+                  "30.00",
+                  "completed"
+                ],
+                [
+                  3,
+                  5,
+                  1,
+                  "999.00",
+                  "completed"
+                ],
+                [
+                  4,
+                  5,
+                  1,
+                  "999.00",
+                  "completed"
+                ],
+                [
+                  2,
+                  5,
+                  1,
+                  "800.00",
+                  "cancelled"
+                ],
+                [
+                  1,
+                  5,
+                  1,
+                  "900.00",
+                  "returned"
+                ],
+                [
+                  2,
+                  5,
+                  2,
+                  "30.00",
+                  "completed"
+                ],
+                [
+                  2,
+                  2,
+                  2,
+                  "20.00",
+                  "completed"
+                ],
+                [
+                  2,
+                  3,
+                  2,
+                  "10.00",
+                  "completed"
+                ],
+                [
+                  2,
+                  4,
+                  2,
+                  "10.00",
+                  "completed"
+                ]
+              ]
+            }
+          ],
+          "reference_queries": {
+            "ranking": "WITH boundaries AS (SELECT date_trunc('quarter', as_of_date) AS finish FROM exercise_context),\n        totals AS (SELECT s.RegionName AS region, p.ProductName AS product, SUM(f.NetRevenue) AS revenue\n          FROM FactSales f JOIN DimDate d USING(DateKey) JOIN DimProduct p USING(ProductKey) JOIN DimStore s USING(StoreKey), boundaries b\n          WHERE d.FullDate >= b.finish - INTERVAL '3 months' AND d.FullDate < b.finish AND f.SaleStatus = 'completed' GROUP BY 1,2),\n        ranked AS (SELECT *, DENSE_RANK() OVER(PARTITION BY region ORDER BY revenue DESC) AS rank FROM totals)\n        SELECT region, product, revenue, rank FROM ranked WHERE rank <= 3 ORDER BY region, rank, product"
+          }
+        }
+      }
     },
     {
       "id": "SQL-002",
@@ -3986,26 +4462,25 @@
       ],
       "student": {
         "scenario": "Produce month-end inventory and average daily inventory by product and warehouse.",
-        "create_table_block": "CREATE TABLE FactInventorySnapshot (\n  SnapshotDateKey INT NOT NULL,\n  ProductKey      INT NOT NULL,\n  WarehouseKey    INT NOT NULL,\n  LotKey          INT NOT NULL,\n  QuantityOnHand  NUMERIC(14,3) NOT NULL\n);\nCREATE TABLE DimDate (\n  DateKey  INT PRIMARY KEY,\n  FullDate DATE NOT NULL\n);",
+        "create_table_block": "CREATE TABLE \"DimDate\" (\n  \"FullDate\" DATE NOT NULL\n);\n\nCREATE TABLE \"FactInventorySnapshot\" (\n  \"SnapshotDate\" DATE NOT NULL,\n  \"ProductKey\" INTEGER NOT NULL,\n  \"WarehouseKey\" INTEGER NOT NULL,\n  \"LotKey\" INTEGER NOT NULL,\n  \"QuantityOnHand\" DECIMAL(14,3) NOT NULL\n);",
         "requirements": [
-          "Some days are missing",
-          "Month-end means the latest available snapshot on or before calendar month-end",
-          "Do not sum quantities across dates",
-          "Average daily inventory should use one daily total after summing lots"
+          "For every product/warehouse pair present anywhere in the source and every reporting month end, return the latest balance on or before that date. Carry prior balances forward; use NULL when no earlier snapshot exists.",
+          "For the same month/pair grid, average observed daily totals within the month (sum lots first). Missing days are excluded, not zero-filled; months without observations return NULL. Round to three decimals."
         ],
         "tasks": [
-          "Write SQL for month-end balance",
-          "Write SQL for average daily balance",
-          "Explain the aggregation order",
-          "Describe behavior when a whole month has no snapshot"
+          "Month-end balance: produce the declared output columns.",
+          "Average observed daily balance: produce the declared output columns.",
+          "Explain correctness, edge cases, and production-scale performance separately."
         ],
         "constraints": [
-          "PostgreSQL-style SQL",
-          "Multiple lots exist per product and warehouse"
+          "Executable dialect: DuckDB 1.5.5. One SELECT (including CTEs) per answer tab.",
+          "The local dataset is intentionally small; runtime does not establish production-scale performance.",
+          "Checks assess result correctness only. Output names, types, precision, and ordering are specified in the workspace."
         ],
         "deliverables": [
-          "Two queries or one clearly separated query",
-          "Edge-case explanation"
+          "Month-end balance SQL",
+          "Average observed daily balance SQL",
+          "Written reasoning and performance notes"
         ]
       },
       "internal": {
@@ -4033,14 +4508,284 @@
       "hints": [
         "First create the correct daily grain.",
         "Sum lots per product-warehouse-day before any time calculation.",
-        "Rank available dates descending within each month for month-end; average the daily totals, not the raw lot rows."
+        "Build daily totals, then join the month/pair grid to the latest earlier snapshot for month-end; average only observations within each month for the daily average."
       ],
       "follow_up_complications": [
-        "Carry the last prior balance into months with no snapshots.",
+        "Compare observed-day averages with calendar-day averages that carry balances forward.",
         "Add corporate currency inventory value using historical costs.",
         "Calculate days of stock using trailing 30-day demand."
       ],
-      "review_exercise": "Write the daily-grain CTE first, then the month-end selection, then the average."
+      "review_exercise": "Write the daily-grain CTE first, then the month-end selection, then the average.",
+      "sql_playground": {
+        "version": 1,
+        "dialect": "duckdb",
+        "tables": [
+          {
+            "name": "DimDate",
+            "description": "Reporting month ends (one row per month).",
+            "columns": [
+              {
+                "name": "FullDate",
+                "type": "DATE",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          },
+          {
+            "name": "FactInventorySnapshot",
+            "description": "Lots are a complete snapshot for each observed product/warehouse day; missing days have no snapshot.",
+            "columns": [
+              {
+                "name": "SnapshotDate",
+                "type": "DATE",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "ProductKey",
+                "type": "INTEGER",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "WarehouseKey",
+                "type": "INTEGER",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "LotKey",
+                "type": "INTEGER",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "QuantityOnHand",
+                "type": "DECIMAL(14,3)",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          }
+        ],
+        "visible_fixture": {
+          "DimDate": [
+            [
+              "2026-01-31"
+            ],
+            [
+              "2026-02-28"
+            ],
+            [
+              "2026-03-31"
+            ]
+          ],
+          "FactInventorySnapshot": [
+            [
+              "2026-01-05",
+              1,
+              1,
+              1,
+              "10"
+            ],
+            [
+              "2026-01-05",
+              1,
+              1,
+              2,
+              "20"
+            ],
+            [
+              "2026-01-30",
+              1,
+              1,
+              1,
+              "5"
+            ],
+            [
+              "2026-01-30",
+              1,
+              1,
+              2,
+              "10"
+            ],
+            [
+              "2026-03-04",
+              1,
+              1,
+              1,
+              "7"
+            ],
+            [
+              "2026-02-10",
+              2,
+              1,
+              1,
+              "40"
+            ],
+            [
+              "2026-01-10",
+              1,
+              2,
+              1,
+              "9"
+            ]
+          ]
+        },
+        "tasks": [
+          {
+            "id": "month_end",
+            "title": "Month-end balance",
+            "description": "For every product/warehouse pair present anywhere in the source and every reporting month end, return the latest balance on or before that date. Carry prior balances forward; use NULL when no earlier snapshot exists.",
+            "columns": [
+              {
+                "name": "month_end",
+                "type": "date"
+              },
+              {
+                "name": "product",
+                "type": "integer"
+              },
+              {
+                "name": "warehouse",
+                "type": "integer"
+              },
+              {
+                "name": "balance",
+                "type": "decimal",
+                "scale": 3
+              }
+            ],
+            "ordered": false
+          },
+          {
+            "id": "daily_average",
+            "title": "Average observed daily balance",
+            "description": "For the same month/pair grid, average observed daily totals within the month (sum lots first). Missing days are excluded, not zero-filled; months without observations return NULL. Round to three decimals.",
+            "columns": [
+              {
+                "name": "month_end",
+                "type": "date"
+              },
+              {
+                "name": "product",
+                "type": "integer"
+              },
+              {
+                "name": "warehouse",
+                "type": "integer"
+              },
+              {
+                "name": "average_balance",
+                "type": "number",
+                "scale": 3
+              }
+            ],
+            "ordered": false
+          }
+        ],
+        "assessment": {
+          "fixtures": [
+            {
+              "DimDate": [
+                [
+                  "2026-01-31"
+                ],
+                [
+                  "2026-02-28"
+                ],
+                [
+                  "2026-03-31"
+                ]
+              ],
+              "FactInventorySnapshot": []
+            },
+            {
+              "DimDate": [
+                [
+                  "2026-01-31"
+                ],
+                [
+                  "2026-02-28"
+                ],
+                [
+                  "2026-03-31"
+                ]
+              ],
+              "FactInventorySnapshot": [
+                [
+                  "2026-01-05",
+                  1,
+                  1,
+                  1,
+                  "10"
+                ],
+                [
+                  "2026-01-05",
+                  1,
+                  1,
+                  2,
+                  "20"
+                ],
+                [
+                  "2026-01-30",
+                  1,
+                  1,
+                  1,
+                  "5"
+                ],
+                [
+                  "2026-01-30",
+                  1,
+                  1,
+                  2,
+                  "10"
+                ],
+                [
+                  "2026-03-04",
+                  1,
+                  1,
+                  1,
+                  "7"
+                ],
+                [
+                  "2026-02-10",
+                  2,
+                  1,
+                  1,
+                  "40"
+                ],
+                [
+                  "2026-01-10",
+                  1,
+                  2,
+                  1,
+                  "9"
+                ],
+                [
+                  "2026-02-28",
+                  1,
+                  1,
+                  1,
+                  "100"
+                ],
+                [
+                  "2026-03-31",
+                  2,
+                  1,
+                  1,
+                  "0"
+                ]
+              ]
+            }
+          ],
+          "reference_queries": {
+            "month_end": "WITH daily AS (SELECT SnapshotDate, ProductKey, WarehouseKey, SUM(QuantityOnHand) AS balance FROM FactInventorySnapshot GROUP BY 1,2,3),\n        pairs AS (SELECT DISTINCT ProductKey, WarehouseKey FROM daily), ranked AS (\n          SELECT m.FullDate AS month_end, p.ProductKey AS product, p.WarehouseKey AS warehouse, d.balance,\n          ROW_NUMBER() OVER(PARTITION BY m.FullDate,p.ProductKey,p.WarehouseKey ORDER BY d.SnapshotDate DESC NULLS LAST) AS rn\n          FROM DimDate m CROSS JOIN pairs p LEFT JOIN daily d ON d.ProductKey=p.ProductKey AND d.WarehouseKey=p.WarehouseKey AND d.SnapshotDate<=m.FullDate)\n        SELECT month_end, product, warehouse, balance FROM ranked WHERE rn=1",
+            "daily_average": "WITH daily AS (SELECT SnapshotDate, ProductKey, WarehouseKey, SUM(QuantityOnHand) AS balance FROM FactInventorySnapshot GROUP BY 1,2,3),\n        pairs AS (SELECT DISTINCT ProductKey, WarehouseKey FROM daily)\n        SELECT m.FullDate AS month_end,p.ProductKey AS product,p.WarehouseKey AS warehouse,ROUND(AVG(d.balance),3) AS average_balance\n        FROM DimDate m CROSS JOIN pairs p LEFT JOIN daily d ON d.ProductKey=p.ProductKey AND d.WarehouseKey=p.WarehouseKey AND date_trunc('month',d.SnapshotDate)=date_trunc('month',m.FullDate) GROUP BY 1,2,3"
+          }
+        }
+      }
     },
     {
       "id": "SQL-003",
@@ -4055,27 +4800,25 @@
       ],
       "student": {
         "scenario": "Resolve each order to the customer version valid at order time using the SCD Type 2 dimension.",
-        "create_table_block": "CREATE TABLE FactOrder (\n  OrderID              BIGINT PRIMARY KEY,\n  OrderTimestamp       TIMESTAMP NOT NULL,\n  CustomerBusinessKey  TEXT NOT NULL,\n  Amount               NUMERIC(14,2) NOT NULL\n);\nCREATE TABLE DimCustomer (\n  CustomerKey         BIGINT PRIMARY KEY,\n  CustomerBusinessKey TEXT NOT NULL,\n  CustomerName        TEXT NOT NULL,\n  Segment             TEXT NOT NULL,\n  ValidFrom           TIMESTAMP NOT NULL,\n  ValidTo             TIMESTAMP NOT NULL,\n  IsCurrent           BOOLEAN NOT NULL\n);",
+        "create_table_block": "CREATE TABLE \"FactOrder\" (\n  \"OrderID\" BIGINT NOT NULL,\n  \"OrderTimestamp\" TIMESTAMP NOT NULL,\n  \"CustomerBusinessKey\" VARCHAR NOT NULL,\n  \"Amount\" DECIMAL(14,2) NOT NULL\n);\n\nCREATE TABLE \"DimCustomer\" (\n  \"CustomerKey\" BIGINT NOT NULL,\n  \"CustomerBusinessKey\" VARCHAR NOT NULL,\n  \"Segment\" VARCHAR NOT NULL,\n  \"ValidFrom\" TIMESTAMP NOT NULL,\n  \"ValidTo\" TIMESTAMP NOT NULL\n);",
         "requirements": [
-          "Resolve each order to the customer version valid at order time",
-          "Detect zero matches and overlapping multiple matches",
-          "Do not silently select an arbitrary version",
-          "Provide a repair approach for unmatched rows"
+          "Return only orders with exactly one matching historical version; do not guess when zero or several versions match.",
+          "Return every order with zero or multiple matches and its match count."
         ],
         "tasks": [
-          "Write the point-in-time join",
-          "Write diagnostic SQL for zero/multiple matches",
-          "Explain boundary conventions",
-          "Propose an unknown-member and late-arrival policy"
+          "Uniquely resolved orders: produce the declared output columns.",
+          "Resolution exceptions: produce the declared output columns.",
+          "Explain correctness, edge cases, and production-scale performance separately."
         ],
         "constraints": [
-          "ValidTo is exclusive",
-          "Some customer changes arrive after their orders"
+          "Executable dialect: DuckDB 1.5.5. One SELECT (including CTEs) per answer tab.",
+          "The local dataset is intentionally small; runtime does not establish production-scale performance.",
+          "Checks assess result correctness only. Output names, types, precision, and ordering are specified in the workspace."
         ],
         "deliverables": [
-          "Join SQL",
-          "Diagnostics",
-          "Repair policy"
+          "Uniquely resolved orders SQL",
+          "Resolution exceptions SQL",
+          "Written reasoning and performance notes"
         ]
       },
       "internal": {
@@ -4111,7 +4854,253 @@
         "Source timestamps use local time zones.",
         "Two source systems reuse the same customer business key."
       ],
-      "review_exercise": "Write the temporal predicate and prove it against a customer whose ValidTo is exclusive."
+      "review_exercise": "Write the temporal predicate and prove it against a customer whose ValidTo is exclusive.",
+      "sql_playground": {
+        "version": 1,
+        "dialect": "duckdb",
+        "tables": [
+          {
+            "name": "FactOrder",
+            "description": "Orders to resolve historically.",
+            "columns": [
+              {
+                "name": "OrderID",
+                "type": "BIGINT",
+                "nullable": false,
+                "key": "Primary key"
+              },
+              {
+                "name": "OrderTimestamp",
+                "type": "TIMESTAMP",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "CustomerBusinessKey",
+                "type": "VARCHAR",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "Amount",
+                "type": "DECIMAL(14,2)",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          },
+          {
+            "name": "DimCustomer",
+            "description": "Historical versions; ValidTo is exclusive. Overlaps are intentional defects.",
+            "columns": [
+              {
+                "name": "CustomerKey",
+                "type": "BIGINT",
+                "nullable": false,
+                "key": "Primary key"
+              },
+              {
+                "name": "CustomerBusinessKey",
+                "type": "VARCHAR",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "Segment",
+                "type": "VARCHAR",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "ValidFrom",
+                "type": "TIMESTAMP",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "ValidTo",
+                "type": "TIMESTAMP",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          }
+        ],
+        "visible_fixture": {
+          "FactOrder": [
+            [
+              1,
+              "2026-02-01 00:00:00",
+              "A",
+              "10"
+            ],
+            [
+              2,
+              "2026-01-31 23:59:59",
+              "A",
+              "20"
+            ],
+            [
+              3,
+              "2026-01-15",
+              "B",
+              "30"
+            ],
+            [
+              4,
+              "2026-01-10",
+              "X",
+              "40"
+            ]
+          ],
+          "DimCustomer": [
+            [
+              1,
+              "A",
+              "retail",
+              "2026-01-01",
+              "2026-02-01"
+            ],
+            [
+              2,
+              "A",
+              "business",
+              "2026-02-01",
+              "2027-01-01"
+            ],
+            [
+              3,
+              "B",
+              "retail",
+              "2026-01-01",
+              "2026-03-01"
+            ],
+            [
+              4,
+              "B",
+              "business",
+              "2026-01-10",
+              "2026-02-01"
+            ]
+          ]
+        },
+        "tasks": [
+          {
+            "id": "resolved",
+            "title": "Uniquely resolved orders",
+            "description": "Return only orders with exactly one matching historical version; do not guess when zero or several versions match.",
+            "columns": [
+              {
+                "name": "order_id",
+                "type": "integer"
+              },
+              {
+                "name": "customer_key",
+                "type": "integer"
+              }
+            ],
+            "ordered": false
+          },
+          {
+            "id": "diagnostics",
+            "title": "Resolution exceptions",
+            "description": "Return every order with zero or multiple matches and its match count.",
+            "columns": [
+              {
+                "name": "order_id",
+                "type": "integer"
+              },
+              {
+                "name": "match_count",
+                "type": "integer"
+              }
+            ],
+            "ordered": false
+          }
+        ],
+        "assessment": {
+          "fixtures": [
+            {
+              "FactOrder": [],
+              "DimCustomer": []
+            },
+            {
+              "FactOrder": [
+                [
+                  1,
+                  "2026-02-01 00:00:00",
+                  "A",
+                  "10"
+                ],
+                [
+                  2,
+                  "2026-01-31 23:59:59",
+                  "A",
+                  "20"
+                ],
+                [
+                  3,
+                  "2026-01-15",
+                  "B",
+                  "30"
+                ],
+                [
+                  4,
+                  "2026-01-10",
+                  "X",
+                  "40"
+                ],
+                [
+                  5,
+                  "2027-01-01",
+                  "A",
+                  "0"
+                ],
+                [
+                  6,
+                  "2026-01-01",
+                  "A",
+                  "5"
+                ]
+              ],
+              "DimCustomer": [
+                [
+                  1,
+                  "A",
+                  "retail",
+                  "2026-01-01",
+                  "2026-02-01"
+                ],
+                [
+                  2,
+                  "A",
+                  "business",
+                  "2026-02-01",
+                  "2027-01-01"
+                ],
+                [
+                  3,
+                  "B",
+                  "retail",
+                  "2026-01-01",
+                  "2026-03-01"
+                ],
+                [
+                  4,
+                  "B",
+                  "business",
+                  "2026-01-10",
+                  "2026-02-01"
+                ]
+              ]
+            }
+          ],
+          "reference_queries": {
+            "resolved": "WITH matches AS (SELECT o.OrderID, COUNT(c.CustomerKey) AS match_count, MIN(c.CustomerKey) AS customer_key FROM FactOrder o LEFT JOIN DimCustomer c ON o.CustomerBusinessKey=c.CustomerBusinessKey AND o.OrderTimestamp>=c.ValidFrom AND o.OrderTimestamp<c.ValidTo GROUP BY o.OrderID) SELECT OrderID AS order_id, customer_key FROM matches WHERE match_count=1",
+            "diagnostics": "WITH matches AS (SELECT o.OrderID, COUNT(c.CustomerKey) AS match_count, MIN(c.CustomerKey) AS customer_key FROM FactOrder o LEFT JOIN DimCustomer c ON o.CustomerBusinessKey=c.CustomerBusinessKey AND o.OrderTimestamp>=c.ValidFrom AND o.OrderTimestamp<c.ValidTo GROUP BY o.OrderID) SELECT OrderID AS order_id,match_count FROM matches WHERE match_count<>1"
+          }
+        }
+      }
     },
     {
       "id": "SQL-004",
@@ -4126,28 +5115,22 @@
       ],
       "student": {
         "scenario": "Build a cohort report showing the percentage of first-time students still enrolled one, two and three terms later.",
-        "create_table_block": "CREATE TABLE FactEnrollment (\n  StudentKey       BIGINT NOT NULL,\n  ProgramKey       INT NOT NULL,\n  TermKey          INT NOT NULL,\n  EnrollmentStatus TEXT NOT NULL\n);\nCREATE TABLE DimTerm (\n  TermKey       INT PRIMARY KEY,\n  TermStartDate DATE NOT NULL,\n  AcademicYear  INT NOT NULL,\n  TermSequence  INT NOT NULL\n);",
+        "create_table_block": "CREATE TABLE \"DimTerm\" (\n  \"TermKey\" INTEGER NOT NULL,\n  \"TermSequence\" INTEGER NOT NULL,\n  \"TermStartDate\" DATE NOT NULL\n);\n\nCREATE TABLE \"FactEnrollment\" (\n  \"StudentKey\" BIGINT NOT NULL,\n  \"ProgramKey\" INTEGER NOT NULL,\n  \"TermKey\" INTEGER NOT NULL,\n  \"EnrollmentStatus\" VARCHAR NOT NULL\n);",
         "requirements": [
-          "Cohort is the student's first enrolled term in a program",
-          "Ignore withdrawn registrations",
-          "A student may skip a term and return",
-          "Denominator remains the original cohort size"
+          "Return first enrolled term sequence per student/program as the cohort. Rates are percentages at offsets +1,+2,+3, rounded to two decimals, with a fixed distinct-student denominator. Skipped-and-returned students count when present at the measured offset. Include only cohorts whose +3 term exists in DimTerm."
         ],
         "tasks": [
-          "Write the SQL",
-          "Explain cohort and retention grains",
-          "Prevent duplicate registrations from inflating counts",
-          "Discuss whether skipped-and-returned students count at each interval"
+          "Cohort retention: produce the declared output columns.",
+          "Explain correctness, edge cases, and production-scale performance separately."
         ],
         "constraints": [
-          "Use TermSequence rather than date arithmetic",
-          "Return cohort term, program, cohort size and retention rates"
+          "Executable dialect: DuckDB 1.5.5. One SELECT (including CTEs) per answer tab.",
+          "The local dataset is intentionally small; runtime does not establish production-scale performance.",
+          "Checks assess result correctness only. Output names, types, precision, and ordering are specified in the workspace."
         ],
         "deliverables": [
-          "Query",
-          "Grain explanation",
-          "Edge-case discussion",
-          "Performance notes"
+          "Cohort retention SQL",
+          "Written reasoning and performance notes"
         ]
       },
       "internal": {
@@ -4183,7 +5166,359 @@
         "Students can change programs.",
         "Compare cohorts by the student's historical residency region."
       ],
-      "review_exercise": "Write a fixed-denominator cohort table for one program and one intake term, then compute +1 and +2 retention."
+      "review_exercise": "Write a fixed-denominator cohort table for one program and one intake term, then compute +1 and +2 retention.",
+      "sql_playground": {
+        "version": 1,
+        "dialect": "duckdb",
+        "tables": [
+          {
+            "name": "DimTerm",
+            "description": "Irregular academic terms; TermSequence defines consecutive terms.",
+            "columns": [
+              {
+                "name": "TermKey",
+                "type": "INTEGER",
+                "nullable": false,
+                "key": "Primary key"
+              },
+              {
+                "name": "TermSequence",
+                "type": "INTEGER",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "TermStartDate",
+                "type": "DATE",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          },
+          {
+            "name": "FactEnrollment",
+            "description": "Duplicate registrations may occur; withdrawn records do not count.",
+            "columns": [
+              {
+                "name": "StudentKey",
+                "type": "BIGINT",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "ProgramKey",
+                "type": "INTEGER",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "TermKey",
+                "type": "INTEGER",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "EnrollmentStatus",
+                "type": "VARCHAR",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          }
+        ],
+        "visible_fixture": {
+          "DimTerm": [
+            [
+              10,
+              1,
+              "2025-01-10"
+            ],
+            [
+              20,
+              2,
+              "2025-04-03"
+            ],
+            [
+              30,
+              3,
+              "2025-09-20"
+            ],
+            [
+              40,
+              4,
+              "2026-01-15"
+            ],
+            [
+              50,
+              5,
+              "2026-05-01"
+            ]
+          ],
+          "FactEnrollment": [
+            [
+              1,
+              1,
+              10,
+              "enrolled"
+            ],
+            [
+              1,
+              1,
+              10,
+              "enrolled"
+            ],
+            [
+              1,
+              1,
+              20,
+              "enrolled"
+            ],
+            [
+              1,
+              1,
+              40,
+              "enrolled"
+            ],
+            [
+              2,
+              1,
+              10,
+              "enrolled"
+            ],
+            [
+              2,
+              1,
+              30,
+              "enrolled"
+            ],
+            [
+              2,
+              1,
+              20,
+              "withdrawn"
+            ],
+            [
+              3,
+              1,
+              20,
+              "enrolled"
+            ],
+            [
+              3,
+              1,
+              30,
+              "enrolled"
+            ],
+            [
+              4,
+              2,
+              10,
+              "enrolled"
+            ],
+            [
+              4,
+              2,
+              20,
+              "enrolled"
+            ]
+          ]
+        },
+        "tasks": [
+          {
+            "id": "cohorts",
+            "title": "Cohort retention",
+            "description": "Return first enrolled term sequence per student/program as the cohort. Rates are percentages at offsets +1,+2,+3, rounded to two decimals, with a fixed distinct-student denominator. Skipped-and-returned students count when present at the measured offset. Include only cohorts whose +3 term exists in DimTerm.",
+            "columns": [
+              {
+                "name": "cohort_sequence",
+                "type": "integer"
+              },
+              {
+                "name": "program",
+                "type": "integer"
+              },
+              {
+                "name": "cohort_size",
+                "type": "integer"
+              },
+              {
+                "name": "retention_1",
+                "type": "number",
+                "scale": 2
+              },
+              {
+                "name": "retention_2",
+                "type": "number",
+                "scale": 2
+              },
+              {
+                "name": "retention_3",
+                "type": "number",
+                "scale": 2
+              }
+            ],
+            "ordered": false
+          }
+        ],
+        "assessment": {
+          "fixtures": [
+            {
+              "DimTerm": [
+                [
+                  10,
+                  1,
+                  "2025-01-10"
+                ],
+                [
+                  20,
+                  2,
+                  "2025-04-03"
+                ],
+                [
+                  30,
+                  3,
+                  "2025-09-20"
+                ],
+                [
+                  40,
+                  4,
+                  "2026-01-15"
+                ],
+                [
+                  50,
+                  5,
+                  "2026-05-01"
+                ]
+              ],
+              "FactEnrollment": []
+            },
+            {
+              "DimTerm": [
+                [
+                  10,
+                  1,
+                  "2025-01-10"
+                ],
+                [
+                  20,
+                  2,
+                  "2025-04-03"
+                ],
+                [
+                  30,
+                  3,
+                  "2025-09-20"
+                ],
+                [
+                  40,
+                  4,
+                  "2026-01-15"
+                ],
+                [
+                  50,
+                  5,
+                  "2026-05-01"
+                ]
+              ],
+              "FactEnrollment": [
+                [
+                  1,
+                  1,
+                  10,
+                  "enrolled"
+                ],
+                [
+                  1,
+                  1,
+                  10,
+                  "enrolled"
+                ],
+                [
+                  1,
+                  1,
+                  20,
+                  "enrolled"
+                ],
+                [
+                  1,
+                  1,
+                  40,
+                  "enrolled"
+                ],
+                [
+                  2,
+                  1,
+                  10,
+                  "enrolled"
+                ],
+                [
+                  2,
+                  1,
+                  30,
+                  "enrolled"
+                ],
+                [
+                  2,
+                  1,
+                  20,
+                  "withdrawn"
+                ],
+                [
+                  3,
+                  1,
+                  20,
+                  "enrolled"
+                ],
+                [
+                  3,
+                  1,
+                  30,
+                  "enrolled"
+                ],
+                [
+                  4,
+                  2,
+                  10,
+                  "enrolled"
+                ],
+                [
+                  4,
+                  2,
+                  20,
+                  "enrolled"
+                ],
+                [
+                  5,
+                  1,
+                  10,
+                  "withdrawn"
+                ],
+                [
+                  5,
+                  1,
+                  20,
+                  "enrolled"
+                ],
+                [
+                  1,
+                  2,
+                  30,
+                  "enrolled"
+                ],
+                [
+                  2,
+                  1,
+                  40,
+                  "enrolled"
+                ]
+              ]
+            }
+          ],
+          "reference_queries": {
+            "cohorts": "WITH activity AS (SELECT DISTINCT e.StudentKey,e.ProgramKey,t.TermSequence FROM FactEnrollment e JOIN DimTerm t USING(TermKey) WHERE EnrollmentStatus='enrolled'),\n    cohort AS (SELECT StudentKey,ProgramKey,MIN(TermSequence) AS first_term FROM activity GROUP BY 1,2)\n    SELECT c.first_term AS cohort_sequence,c.ProgramKey AS program,COUNT(DISTINCT c.StudentKey) AS cohort_size,\n    ROUND(100.0*COUNT(DISTINCT CASE WHEN a.TermSequence=c.first_term+1 THEN c.StudentKey END)/COUNT(DISTINCT c.StudentKey),2) AS retention_1,\n    ROUND(100.0*COUNT(DISTINCT CASE WHEN a.TermSequence=c.first_term+2 THEN c.StudentKey END)/COUNT(DISTINCT c.StudentKey),2) AS retention_2,\n    ROUND(100.0*COUNT(DISTINCT CASE WHEN a.TermSequence=c.first_term+3 THEN c.StudentKey END)/COUNT(DISTINCT c.StudentKey),2) AS retention_3\n    FROM cohort c LEFT JOIN activity a ON a.StudentKey=c.StudentKey AND a.ProgramKey=c.ProgramKey\n    WHERE c.first_term+3 <= (SELECT MAX(TermSequence) FROM DimTerm) GROUP BY 1,2"
+          }
+        }
+      }
     },
     {
       "id": "SQL-005",
@@ -4198,27 +5533,26 @@
       ],
       "student": {
         "scenario": "Produce a running balance per account at each transaction and a daily closing balance per account.",
-        "create_table_block": "CREATE TABLE FactTransaction (\n  AccountKey          BIGINT NOT NULL,\n  TransactionTimestamp TIMESTAMP NOT NULL,\n  Amount              NUMERIC(14,2) NOT NULL,\n  TransactionType     TEXT NOT NULL\n);",
+        "create_table_block": "CREATE TABLE \"FactTransaction\" (\n  \"TransactionID\" BIGINT NOT NULL,\n  \"AccountKey\" BIGINT NOT NULL,\n  \"TransactionTimestamp\" TIMESTAMP NOT NULL,\n  \"Amount\" DECIMAL(14,2) NOT NULL\n);",
         "requirements": [
-          "Reversals are recorded as negative-amount transactions",
-          "Multiple transactions can share the same timestamp",
-          "Daily closing balance is the balance after the last transaction of the day",
-          "Do not sum across days for the running balance"
+          "Return each transaction's balance ordered by account, timestamp, then transaction ID. Use TransactionID to resolve equal timestamps.",
+          "Return the balance after the final transaction of each observed account/day. Do not sum intermediate balances or fill missing dates."
         ],
         "tasks": [
-          "Write SQL for the running balance",
-          "Write SQL for the daily closing balance",
-          "Explain the window frame and tie-break",
-          "Explain behavior when two transactions share a timestamp"
+          "Transaction balances: produce the declared output columns.",
+          "Daily closing balances: produce the declared output columns.",
+          "Explain correctness, edge cases, and production-scale performance separately."
         ],
         "constraints": [
-          "PostgreSQL-style SQL",
-          "FactTransaction has 500 million rows"
+          "Executable dialect: DuckDB 1.5.5. One SELECT (including CTEs) per answer tab.",
+          "The local dataset is intentionally small; runtime does not establish production-scale performance.",
+          "Checks assess result correctness only. Output names, types, precision, and ordering are specified in the workspace.",
+          "Production context for your written performance discussion: 500 million transactions."
         ],
         "deliverables": [
-          "Two queries",
-          "Window frame explanation",
-          "Tie-break policy"
+          "Transaction balances SQL",
+          "Daily closing balances SQL",
+          "Written reasoning and performance notes"
         ]
       },
       "internal": {
@@ -4254,7 +5588,178 @@
         "Account is closed and reopened.",
         "Finance wants the balance as of end of business in a specific time zone."
       ],
-      "review_exercise": "Write a running total over a table with duplicate timestamps and prove your tie-break is deterministic."
+      "review_exercise": "Write a running total over a table with duplicate timestamps and prove your tie-break is deterministic.",
+      "sql_playground": {
+        "version": 1,
+        "dialect": "duckdb",
+        "tables": [
+          {
+            "name": "FactTransaction",
+            "description": "Transactions start from a zero opening balance; negative amounts include reversals.",
+            "columns": [
+              {
+                "name": "TransactionID",
+                "type": "BIGINT",
+                "nullable": false,
+                "key": "Unique deterministic tie-break"
+              },
+              {
+                "name": "AccountKey",
+                "type": "BIGINT",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "TransactionTimestamp",
+                "type": "TIMESTAMP",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "Amount",
+                "type": "DECIMAL(14,2)",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          }
+        ],
+        "visible_fixture": {
+          "FactTransaction": [
+            [
+              1,
+              1,
+              "2026-01-01 09:00:00",
+              "100"
+            ],
+            [
+              2,
+              1,
+              "2026-01-01 09:00:00",
+              "-20"
+            ],
+            [
+              3,
+              1,
+              "2026-01-02 10:00:00",
+              "10"
+            ],
+            [
+              4,
+              1,
+              "2026-01-02 11:00:00",
+              "-50"
+            ],
+            [
+              5,
+              2,
+              "2026-01-01 08:00:00",
+              "30"
+            ]
+          ]
+        },
+        "tasks": [
+          {
+            "id": "running",
+            "title": "Transaction balances",
+            "description": "Return each transaction's balance ordered by account, timestamp, then transaction ID. Use TransactionID to resolve equal timestamps.",
+            "columns": [
+              {
+                "name": "transaction_id",
+                "type": "integer"
+              },
+              {
+                "name": "account",
+                "type": "integer"
+              },
+              {
+                "name": "balance",
+                "type": "decimal",
+                "scale": 2
+              }
+            ],
+            "ordered": true
+          },
+          {
+            "id": "closing",
+            "title": "Daily closing balances",
+            "description": "Return the balance after the final transaction of each observed account/day. Do not sum intermediate balances or fill missing dates.",
+            "columns": [
+              {
+                "name": "account",
+                "type": "integer"
+              },
+              {
+                "name": "balance_date",
+                "type": "date"
+              },
+              {
+                "name": "closing_balance",
+                "type": "decimal",
+                "scale": 2
+              }
+            ],
+            "ordered": false
+          }
+        ],
+        "assessment": {
+          "fixtures": [
+            {
+              "FactTransaction": []
+            },
+            {
+              "FactTransaction": [
+                [
+                  7,
+                  2,
+                  "2026-01-04 10:00:00",
+                  "-30"
+                ],
+                [
+                  6,
+                  1,
+                  "2026-01-01 09:00:00",
+                  "5"
+                ],
+                [
+                  5,
+                  2,
+                  "2026-01-01 08:00:00",
+                  "30"
+                ],
+                [
+                  4,
+                  1,
+                  "2026-01-02 11:00:00",
+                  "-50"
+                ],
+                [
+                  3,
+                  1,
+                  "2026-01-02 10:00:00",
+                  "10"
+                ],
+                [
+                  2,
+                  1,
+                  "2026-01-01 09:00:00",
+                  "-20"
+                ],
+                [
+                  1,
+                  1,
+                  "2026-01-01 09:00:00",
+                  "100"
+                ]
+              ]
+            }
+          ],
+          "reference_queries": {
+            "running": "WITH running AS (SELECT TransactionID,AccountKey,TransactionTimestamp,SUM(Amount) OVER(PARTITION BY AccountKey ORDER BY TransactionTimestamp,TransactionID ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS balance FROM FactTransaction) SELECT TransactionID AS transaction_id,AccountKey AS account,balance FROM running ORDER BY AccountKey,TransactionTimestamp,TransactionID",
+            "closing": "WITH running AS (SELECT TransactionID,AccountKey,TransactionTimestamp,SUM(Amount) OVER(PARTITION BY AccountKey ORDER BY TransactionTimestamp,TransactionID ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS balance FROM FactTransaction) SELECT AccountKey AS account,CAST(TransactionTimestamp AS DATE) AS balance_date,balance AS closing_balance FROM running QUALIFY ROW_NUMBER() OVER(PARTITION BY AccountKey,CAST(TransactionTimestamp AS DATE) ORDER BY TransactionTimestamp DESC,TransactionID DESC)=1"
+          }
+        }
+      }
     },
     {
       "id": "SQL-006",
@@ -4269,28 +5774,23 @@
       ],
       "student": {
         "scenario": "Identify each user's longest consecutive-day login streak and the start and end dates of that streak.",
-        "create_table_block": "CREATE TABLE FactLogin (\n  UserKey   BIGINT NOT NULL,\n  LoginDate DATE   NOT NULL\n);",
+        "create_table_block": "CREATE TABLE \"FactLogin\" (\n  \"UserKey\" BIGINT NOT NULL,\n  \"LoginDate\" DATE NOT NULL\n);",
         "requirements": [
-          "Days are calendar days in the user's time zone",
-          "A user may have multiple streaks",
-          "Return the longest streak per user, with ties broken by earliest start",
-          "Ignore days with no login"
+          "Return each user's longest run of consecutive calendar dates, ignoring duplicate logins. A missing calendar day breaks a streak. Break equal-length streak ties by earliest start."
         ],
         "tasks": [
-          "Write the SQL",
-          "Explain the island detection method",
-          "Explain how you handle time zones",
-          "Identify index or partitioning choices that would help at scale"
+          "Longest login streak: produce the declared output columns.",
+          "Explain correctness, edge cases, and production-scale performance separately."
         ],
         "constraints": [
-          "PostgreSQL-style SQL",
-          "FactLogin has 2 billion rows"
+          "Executable dialect: DuckDB 1.5.5. One SELECT (including CTEs) per answer tab.",
+          "The local dataset is intentionally small; runtime does not establish production-scale performance.",
+          "Checks assess result correctness only. Output names, types, precision, and ordering are specified in the workspace.",
+          "Production context for your written performance discussion: 2 billion logins."
         ],
         "deliverables": [
-          "Query",
-          "Island logic explanation",
-          "Time-zone handling",
-          "Performance notes"
+          "Longest login streak SQL",
+          "Written reasoning and performance notes"
         ]
       },
       "internal": {
@@ -4324,7 +5824,167 @@
         "A streak can span a month boundary.",
         "Users may log in from multiple time zones."
       ],
-      "review_exercise": "Detect islands for a small sample where two users share the same date and one user has two streaks."
+      "review_exercise": "Detect islands for a small sample where two users share the same date and one user has two streaks.",
+      "sql_playground": {
+        "version": 1,
+        "dialect": "duckdb",
+        "tables": [
+          {
+            "name": "FactLogin",
+            "description": "LoginDate is already the user's local calendar date. Repeated logins on a day are possible.",
+            "columns": [
+              {
+                "name": "UserKey",
+                "type": "BIGINT",
+                "nullable": false,
+                "key": ""
+              },
+              {
+                "name": "LoginDate",
+                "type": "DATE",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          }
+        ],
+        "visible_fixture": {
+          "FactLogin": [
+            [
+              1,
+              "2026-01-01"
+            ],
+            [
+              1,
+              "2026-01-01"
+            ],
+            [
+              1,
+              "2026-01-02"
+            ],
+            [
+              1,
+              "2026-01-05"
+            ],
+            [
+              1,
+              "2026-01-06"
+            ],
+            [
+              2,
+              "2026-02-28"
+            ],
+            [
+              2,
+              "2026-03-01"
+            ],
+            [
+              2,
+              "2026-03-02"
+            ],
+            [
+              3,
+              "2026-01-10"
+            ]
+          ]
+        },
+        "tasks": [
+          {
+            "id": "streaks",
+            "title": "Longest login streak",
+            "description": "Return each user's longest run of consecutive calendar dates, ignoring duplicate logins. A missing calendar day breaks a streak. Break equal-length streak ties by earliest start.",
+            "columns": [
+              {
+                "name": "user_id",
+                "type": "integer"
+              },
+              {
+                "name": "start_date",
+                "type": "date"
+              },
+              {
+                "name": "end_date",
+                "type": "date"
+              },
+              {
+                "name": "streak_days",
+                "type": "integer"
+              }
+            ],
+            "ordered": false
+          }
+        ],
+        "assessment": {
+          "fixtures": [
+            {
+              "FactLogin": []
+            },
+            {
+              "FactLogin": [
+                [
+                  1,
+                  "2026-01-01"
+                ],
+                [
+                  1,
+                  "2026-01-01"
+                ],
+                [
+                  1,
+                  "2026-01-02"
+                ],
+                [
+                  1,
+                  "2026-01-05"
+                ],
+                [
+                  1,
+                  "2026-01-06"
+                ],
+                [
+                  2,
+                  "2026-02-28"
+                ],
+                [
+                  2,
+                  "2026-03-01"
+                ],
+                [
+                  2,
+                  "2026-03-02"
+                ],
+                [
+                  3,
+                  "2026-01-10"
+                ],
+                [
+                  1,
+                  "2026-01-07"
+                ],
+                [
+                  2,
+                  "2026-03-01"
+                ],
+                [
+                  4,
+                  "2024-02-28"
+                ],
+                [
+                  4,
+                  "2024-02-29"
+                ],
+                [
+                  4,
+                  "2024-03-01"
+                ]
+              ]
+            }
+          ],
+          "reference_queries": {
+            "streaks": "WITH days AS (SELECT DISTINCT UserKey,LoginDate FROM FactLogin), numbered AS (\n      SELECT *,LoginDate-CAST(ROW_NUMBER() OVER(PARTITION BY UserKey ORDER BY LoginDate) AS INTEGER) AS grp FROM days),\n      streaks AS (SELECT UserKey,MIN(LoginDate) AS start_date,MAX(LoginDate) AS end_date,COUNT(*) AS streak_days FROM numbered GROUP BY UserKey,grp)\n      SELECT UserKey AS user_id,start_date,end_date,streak_days FROM streaks\n      QUALIFY ROW_NUMBER() OVER(PARTITION BY UserKey ORDER BY streak_days DESC,start_date)=1"
+          }
+        }
+      }
     },
     {
       "id": "SQL-007",
@@ -4339,27 +5999,23 @@
       ],
       "student": {
         "scenario": "Produce revenue rolled up to every level of the management hierarchy, including each manager's own sales.",
-        "create_table_block": "CREATE TABLE DimEmployee (\n  EmployeeKey    BIGINT PRIMARY KEY,\n  ManagerKey     BIGINT NULL,\n  EmployeeName   TEXT NOT NULL,\n  DepartmentKey  INT NOT NULL\n);\nCREATE TABLE FactSales (\n  EmployeeKey BIGINT NOT NULL,\n  SaleDate    DATE   NOT NULL,\n  NetRevenue  NUMERIC(14,2) NOT NULL\n);",
+        "create_table_block": "CREATE TABLE \"DimEmployee\" (\n  \"EmployeeKey\" BIGINT NOT NULL,\n  \"ManagerKey\" BIGINT,\n  \"EmployeeName\" VARCHAR NOT NULL\n);\n\nCREATE TABLE \"FactSales\" (\n  \"EmployeeKey\" BIGINT NOT NULL,\n  \"NetRevenue\" DECIMAL(14,2) NOT NULL\n);",
         "requirements": [
-          "Hierarchy depth is unknown",
-          "A manager also sells",
-          "No cycles in the data, but the query should not hang if one exists",
-          "Return level number and path for each row"
+          "Return one row per employee reachable from a root (ManagerKey IS NULL). Exclude disconnected cycle components. Level starts at 0 and path is slash-separated employee IDs, e.g. 1/2/3. Include own sales plus every reachable descendant's sales exactly once. Employees without sales have decimal zero. Guard recursion against revisiting an employee."
         ],
         "tasks": [
-          "Write the recursive SQL",
-          "Explain cycle protection",
-          "Explain how you avoid double counting a sale at multiple levels",
-          "Propose a materialized rollup for performance"
+          "Rooted hierarchy rollup: produce the declared output columns.",
+          "Explain correctness, edge cases, and production-scale performance separately."
         ],
         "constraints": [
-          "PostgreSQL-style SQL",
-          "DimEmployee has 80,000 rows"
+          "Executable dialect: DuckDB 1.5.5. One SELECT (including CTEs) per answer tab.",
+          "The local dataset is intentionally small; runtime does not establish production-scale performance.",
+          "Checks assess result correctness only. Output names, types, precision, and ordering are specified in the workspace.",
+          "Production context for your written performance discussion: 80,000 employees."
         ],
         "deliverables": [
-          "Recursive query",
-          "Cycle protection",
-          "Rollup materialization plan"
+          "Rooted hierarchy rollup SQL",
+          "Written reasoning and performance notes"
         ]
       },
       "internal": {
@@ -4394,7 +6050,222 @@
         "Hierarchy changes mid-year.",
         "Revenue must be allocated across dotted-line managers."
       ],
-      "review_exercise": "Write the recursive CTE with a path column and prove a cycle would be caught."
+      "review_exercise": "Write the recursive CTE with a path column and prove a cycle would be caught.",
+      "sql_playground": {
+        "version": 1,
+        "dialect": "duckdb",
+        "tables": [
+          {
+            "name": "DimEmployee",
+            "description": "Each employee has at most one parent; disconnected cycles may exist as source defects.",
+            "columns": [
+              {
+                "name": "EmployeeKey",
+                "type": "BIGINT",
+                "nullable": false,
+                "key": "Primary key"
+              },
+              {
+                "name": "ManagerKey",
+                "type": "BIGINT",
+                "nullable": true,
+                "key": "References DimEmployee"
+              },
+              {
+                "name": "EmployeeName",
+                "type": "VARCHAR",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          },
+          {
+            "name": "FactSales",
+            "description": "Individual sales; each employee's own sales count once in their ancestor's rollup.",
+            "columns": [
+              {
+                "name": "EmployeeKey",
+                "type": "BIGINT",
+                "nullable": false,
+                "key": "References DimEmployee"
+              },
+              {
+                "name": "NetRevenue",
+                "type": "DECIMAL(14,2)",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          }
+        ],
+        "visible_fixture": {
+          "DimEmployee": [
+            [
+              1,
+              null,
+              "Ada"
+            ],
+            [
+              2,
+              1,
+              "Bo"
+            ],
+            [
+              3,
+              2,
+              "Cy"
+            ],
+            [
+              4,
+              null,
+              "Dee"
+            ],
+            [
+              5,
+              1,
+              "Eli"
+            ]
+          ],
+          "FactSales": [
+            [
+              1,
+              "100"
+            ],
+            [
+              2,
+              "20"
+            ],
+            [
+              2,
+              "5"
+            ],
+            [
+              3,
+              "7"
+            ],
+            [
+              4,
+              "30"
+            ]
+          ]
+        },
+        "tasks": [
+          {
+            "id": "hierarchy",
+            "title": "Rooted hierarchy rollup",
+            "description": "Return one row per employee reachable from a root (ManagerKey IS NULL). Exclude disconnected cycle components. Level starts at 0 and path is slash-separated employee IDs, e.g. 1/2/3. Include own sales plus every reachable descendant's sales exactly once. Employees without sales have decimal zero. Guard recursion against revisiting an employee.",
+            "columns": [
+              {
+                "name": "employee_id",
+                "type": "integer"
+              },
+              {
+                "name": "level",
+                "type": "integer"
+              },
+              {
+                "name": "path",
+                "type": "string"
+              },
+              {
+                "name": "revenue",
+                "type": "decimal",
+                "scale": 2
+              }
+            ],
+            "ordered": false
+          }
+        ],
+        "assessment": {
+          "fixtures": [
+            {
+              "DimEmployee": [],
+              "FactSales": []
+            },
+            {
+              "DimEmployee": [
+                [
+                  1,
+                  null,
+                  "Ada"
+                ],
+                [
+                  2,
+                  1,
+                  "Bo"
+                ],
+                [
+                  3,
+                  2,
+                  "Cy"
+                ],
+                [
+                  4,
+                  null,
+                  "Dee"
+                ],
+                [
+                  5,
+                  1,
+                  "Eli"
+                ],
+                [
+                  6,
+                  7,
+                  "Faye"
+                ],
+                [
+                  7,
+                  6,
+                  "Gus"
+                ],
+                [
+                  8,
+                  7,
+                  "Hal"
+                ]
+              ],
+              "FactSales": [
+                [
+                  1,
+                  "100"
+                ],
+                [
+                  2,
+                  "20"
+                ],
+                [
+                  2,
+                  "5"
+                ],
+                [
+                  3,
+                  "7"
+                ],
+                [
+                  4,
+                  "30"
+                ],
+                [
+                  6,
+                  "9"
+                ],
+                [
+                  7,
+                  "11"
+                ],
+                [
+                  8,
+                  "3"
+                ]
+              ]
+            }
+          ],
+          "reference_queries": {
+            "hierarchy": "WITH RECURSIVE hierarchy AS (\n        SELECT EmployeeKey,0 AS level,CAST(EmployeeKey AS VARCHAR) AS path,[EmployeeKey] AS visited FROM DimEmployee WHERE ManagerKey IS NULL\n        UNION ALL SELECT e.EmployeeKey,h.level+1,h.path||'/'||CAST(e.EmployeeKey AS VARCHAR),list_append(h.visited,e.EmployeeKey)\n        FROM hierarchy h JOIN DimEmployee e ON e.ManagerKey=h.EmployeeKey WHERE NOT list_contains(h.visited,e.EmployeeKey)),\n      own AS (SELECT EmployeeKey,SUM(NetRevenue) AS revenue FROM FactSales GROUP BY 1)\n      SELECT h.EmployeeKey AS employee_id,h.level,h.path,CAST(COALESCE(SUM(o.revenue),0) AS DECIMAL(18,2)) AS revenue\n      FROM hierarchy h JOIN hierarchy d ON d.path=h.path OR starts_with(d.path,h.path||'/') LEFT JOIN own o ON o.EmployeeKey=d.EmployeeKey GROUP BY 1,2,3"
+          }
+        }
+      }
     },
     {
       "id": "SQL-008",
@@ -4483,30 +6354,32 @@
         "prose"
       ],
       "student": {
-        "scenario": "You are given four queries that run without error but produce wrong results because of implicit or lossy conversions. Diagnose each and rewrite it safely.",
-        "create_table_block": "-- Assume these tables exist\n-- users(id BIGINT, age_text TEXT, signup_ts TIMESTAMP)\n-- payments(id BIGINT, amount_text TEXT)\n-- flags(id BIGINT, active_text TEXT)",
+        "scenario": "Investigate unsafe implicit or lossy conversions in age, money and boolean source fields. Some naive queries error on dirty data; others silently change meaning. Write four safe, auditable SELECT queries and explain each failure mode.",
+        "create_table_block": "CREATE TABLE \"users\" (\n  \"id\" BIGINT NOT NULL,\n  \"age_text\" VARCHAR\n);\n\nCREATE TABLE \"payments\" (\n  \"id\" BIGINT NOT NULL,\n  \"amount_text\" VARCHAR\n);\n\nCREATE TABLE \"flags\" (\n  \"id\" BIGINT NOT NULL,\n  \"active_text\" VARCHAR\n);",
         "requirements": [
-          "Explain why each query is wrong",
-          "Rewrite each query using explicit and safe conversion",
-          "State the exact failure mode (rounding, truncation, silent NULL, abort)",
-          "Propose a lint rule or test that would catch the class of bug"
+          "Return id and integer age for valid ages strictly greater than 30. Accept only whole-number text (optional leading +, surrounding whitespace); age range 0–120. Explain why comparing raw age_text with 30 may error or apply unwanted conversion.",
+          "Return every payment id with amount DECIMAL(12,2) and invalid boolean. Blank, NULL, unparseable or overflowing inputs have NULL amount and invalid=true. Round fractional cents half away from zero. Explain why FLOAT is inappropriate for exact money.",
+          "Return every flag id, active boolean, and invalid boolean. Use the tokens documented in the flags table; all other inputs including NULL are invalid and produce NULL active.",
+          "Return one row: sum valid DECIMAL(12,2) converted amounts (decimal zero if none) and count invalid rows. Never silently lose invalid-row counts. Explain why a direct CAST can abort on dirty data."
         ],
         "tasks": [
-          "Diagnose query A: SELECT * FROM users WHERE age_text > 30",
-          "Diagnose query B: SELECT amount_text::FLOAT FROM payments",
-          "Diagnose query C: SELECT * FROM flags WHERE active_text = TRUE",
-          "Diagnose query D: SELECT SUM(amount_text::NUMERIC(10,2)) FROM payments",
-          "Rewrite all four safely",
-          "Propose one automated check"
+          "A · Explicit age conversion: produce the declared output columns.",
+          "B · Decimal amounts: produce the declared output columns.",
+          "C · Explicit boolean mapping: produce the declared output columns.",
+          "D · Auditable money total: produce the declared output columns.",
+          "Explain correctness, edge cases, and production-scale performance separately."
         ],
         "constraints": [
-          "PostgreSQL-style SQL",
-          "Address precision explicitly for money"
+          "Executable dialect: DuckDB 1.5.5. One SELECT (including CTEs) per answer tab.",
+          "The local dataset is intentionally small; runtime does not establish production-scale performance.",
+          "Checks assess result correctness only. Output names, types, precision, and ordering are specified in the workspace."
         ],
         "deliverables": [
-          "Four diagnoses",
-          "Four rewritten queries",
-          "One automated check proposal"
+          "A · Explicit age conversion SQL",
+          "B · Decimal amounts SQL",
+          "C · Explicit boolean mapping SQL",
+          "D · Auditable money total SQL",
+          "Written reasoning and performance notes"
         ]
       },
       "internal": {
@@ -4542,7 +6415,350 @@
         "The timestamp column arrives in a non-ISO format.",
         "The boolean text column uses 'Y', 'N' and NULL."
       ],
-      "review_exercise": "Write one test per query that would have failed on the original version."
+      "review_exercise": "Write one test per query that would have failed on the original version.",
+      "sql_playground": {
+        "version": 1,
+        "dialect": "duckdb",
+        "tables": [
+          {
+            "name": "users",
+            "description": "Source age strings may be blank or invalid; valid age is an integer 0–120.",
+            "columns": [
+              {
+                "name": "id",
+                "type": "BIGINT",
+                "nullable": false,
+                "key": "Primary key"
+              },
+              {
+                "name": "age_text",
+                "type": "VARCHAR",
+                "nullable": true,
+                "key": ""
+              }
+            ]
+          },
+          {
+            "name": "payments",
+            "description": "Money uses decimal precision; blanks and invalid/overflowing values must be flagged.",
+            "columns": [
+              {
+                "name": "id",
+                "type": "BIGINT",
+                "nullable": false,
+                "key": "Primary key"
+              },
+              {
+                "name": "amount_text",
+                "type": "VARCHAR",
+                "nullable": true,
+                "key": ""
+              }
+            ]
+          },
+          {
+            "name": "flags",
+            "description": "Accepted true tokens: true,t,yes,y,1; false: false,f,no,n,0; trim and ignore case.",
+            "columns": [
+              {
+                "name": "id",
+                "type": "BIGINT",
+                "nullable": false,
+                "key": "Primary key"
+              },
+              {
+                "name": "active_text",
+                "type": "VARCHAR",
+                "nullable": true,
+                "key": ""
+              }
+            ]
+          }
+        ],
+        "visible_fixture": {
+          "users": [
+            [
+              1,
+              "31"
+            ],
+            [
+              2,
+              "9"
+            ],
+            [
+              3,
+              " 40 "
+            ],
+            [
+              4,
+              "bad"
+            ],
+            [
+              5,
+              "-2"
+            ],
+            [
+              6,
+              null
+            ]
+          ],
+          "payments": [
+            [
+              1,
+              "10.10"
+            ],
+            [
+              2,
+              "0.20"
+            ],
+            [
+              3,
+              "bad"
+            ],
+            [
+              4,
+              null
+            ],
+            [
+              5,
+              "1.005"
+            ],
+            [
+              6,
+              "999999999999999999999"
+            ]
+          ],
+          "flags": [
+            [
+              1,
+              "YES"
+            ],
+            [
+              2,
+              " false "
+            ],
+            [
+              3,
+              "0"
+            ],
+            [
+              4,
+              "unknown"
+            ],
+            [
+              5,
+              null
+            ],
+            [
+              6,
+              "1"
+            ]
+          ]
+        },
+        "tasks": [
+          {
+            "id": "ages",
+            "title": "A · Explicit age conversion",
+            "description": "Return id and integer age for valid ages strictly greater than 30. Accept only whole-number text (optional leading +, surrounding whitespace); age range 0–120. Explain why comparing raw age_text with 30 may error or apply unwanted conversion.",
+            "columns": [
+              {
+                "name": "id",
+                "type": "integer"
+              },
+              {
+                "name": "age",
+                "type": "integer"
+              }
+            ],
+            "ordered": false
+          },
+          {
+            "id": "money",
+            "title": "B · Decimal amounts",
+            "description": "Return every payment id with amount DECIMAL(12,2) and invalid boolean. Blank, NULL, unparseable or overflowing inputs have NULL amount and invalid=true. Round fractional cents half away from zero. Explain why FLOAT is inappropriate for exact money.",
+            "columns": [
+              {
+                "name": "id",
+                "type": "integer"
+              },
+              {
+                "name": "amount",
+                "type": "decimal",
+                "scale": 2
+              },
+              {
+                "name": "invalid",
+                "type": "boolean"
+              }
+            ],
+            "ordered": false
+          },
+          {
+            "id": "booleans",
+            "title": "C · Explicit boolean mapping",
+            "description": "Return every flag id, active boolean, and invalid boolean. Use the tokens documented in the flags table; all other inputs including NULL are invalid and produce NULL active.",
+            "columns": [
+              {
+                "name": "id",
+                "type": "integer"
+              },
+              {
+                "name": "active",
+                "type": "boolean"
+              },
+              {
+                "name": "invalid",
+                "type": "boolean"
+              }
+            ],
+            "ordered": false
+          },
+          {
+            "id": "total",
+            "title": "D · Auditable money total",
+            "description": "Return one row: sum valid DECIMAL(12,2) converted amounts (decimal zero if none) and count invalid rows. Never silently lose invalid-row counts. Explain why a direct CAST can abort on dirty data.",
+            "columns": [
+              {
+                "name": "total",
+                "type": "decimal",
+                "scale": 2
+              },
+              {
+                "name": "invalid_count",
+                "type": "integer"
+              }
+            ],
+            "ordered": false
+          }
+        ],
+        "assessment": {
+          "fixtures": [
+            {
+              "users": [],
+              "payments": [],
+              "flags": []
+            },
+            {
+              "users": [
+                [
+                  1,
+                  "31"
+                ],
+                [
+                  2,
+                  "9"
+                ],
+                [
+                  3,
+                  " 40 "
+                ],
+                [
+                  4,
+                  "bad"
+                ],
+                [
+                  5,
+                  "-2"
+                ],
+                [
+                  6,
+                  null
+                ],
+                [
+                  7,
+                  "30.9"
+                ],
+                [
+                  8,
+                  "121"
+                ],
+                [
+                  9,
+                  "+35"
+                ],
+                [
+                  10,
+                  "30"
+                ]
+              ],
+              "payments": [
+                [
+                  1,
+                  "10.10"
+                ],
+                [
+                  2,
+                  "0.20"
+                ],
+                [
+                  3,
+                  "bad"
+                ],
+                [
+                  4,
+                  null
+                ],
+                [
+                  5,
+                  "1.005"
+                ],
+                [
+                  6,
+                  "999999999999999999999"
+                ],
+                [
+                  7,
+                  "-2.555"
+                ],
+                [
+                  8,
+                  " "
+                ]
+              ],
+              "flags": [
+                [
+                  1,
+                  "YES"
+                ],
+                [
+                  2,
+                  " false "
+                ],
+                [
+                  3,
+                  "0"
+                ],
+                [
+                  4,
+                  "unknown"
+                ],
+                [
+                  5,
+                  null
+                ],
+                [
+                  6,
+                  "1"
+                ],
+                [
+                  7,
+                  "N"
+                ],
+                [
+                  8,
+                  " t "
+                ]
+              ]
+            }
+          ],
+          "reference_queries": {
+            "ages": "WITH parsed AS (SELECT id,CASE WHEN regexp_full_match(TRIM(age_text),'[+]?[0-9]+') THEN TRY_CAST(TRIM(age_text) AS INTEGER) END AS age FROM users) SELECT id,age FROM parsed WHERE age>30 AND age<=120",
+            "money": "WITH parsed AS (SELECT id,TRY_CAST(NULLIF(TRIM(amount_text),'') AS DECIMAL(12,2)) AS amount FROM payments) SELECT id,amount,amount IS NULL AS invalid FROM parsed",
+            "booleans": "WITH parsed AS (SELECT id,CASE WHEN lower(trim(active_text)) IN ('true','t','yes','y','1') THEN true WHEN lower(trim(active_text)) IN ('false','f','no','n','0') THEN false END AS active FROM flags) SELECT id,active,active IS NULL AS invalid FROM parsed",
+            "total": "WITH parsed AS (SELECT id,TRY_CAST(NULLIF(TRIM(amount_text),'') AS DECIMAL(12,2)) AS amount FROM payments) SELECT CAST(COALESCE(SUM(amount),0) AS DECIMAL(18,2)) AS total,COUNT(*) FILTER(WHERE amount IS NULL) AS invalid_count FROM parsed"
+          }
+        }
+      }
     },
     {
       "id": "SQL-010",
@@ -4702,28 +6918,23 @@
         "prose"
       ],
       "student": {
-        "scenario": "A fact table has NULLs meaning three different things: truly unknown, not applicable, and not yet arrived. Downstream analysts are treating all NULLs the same and misreporting.",
-        "create_table_block": "CREATE TABLE fact_orders (\n  order_id     BIGINT PRIMARY KEY,\n  customer_id  BIGINT,\n  ship_date    DATE,\n  cancel_date  DATE,\n  ship_cost    NUMERIC(12,2),\n  discount_pct NUMERIC(5,4)\n);",
+        "scenario": "Shipping and discount NULLs mean unknown, not applicable, or pending. Explicit business-state columns identify the meaning. Produce an auditable summary without dropping unmatched customers or treating every missing cost as zero.",
+        "create_table_block": "CREATE TABLE \"fact_orders\" (\n  \"order_id\" BIGINT NOT NULL,\n  \"customer_id\" BIGINT,\n  \"ship_cost\" DECIMAL(12,2),\n  \"shipping_state\" VARCHAR NOT NULL,\n  \"discount_pct\" DECIMAL(5,4),\n  \"discount_state\" VARCHAR NOT NULL\n);\n\nCREATE TABLE \"customers\" (\n  \"customer_id\" BIGINT NOT NULL,\n  \"customer_name\" VARCHAR NOT NULL\n);",
         "requirements": [
-          "Distinguish the three NULL meanings with explicit handling",
-          "Do not silently replace NULLs with zero",
-          "Handle NULLs in joins safely",
-          "Provide a query that returns correct totals despite NULLs"
+          "Return one summary row with total order count, known shipping-cost sum (decimal zero if none), counts of unknown/not_applicable/pending shipping states, and unmatched-customer count (including NULL IDs). Count each fact once. Preserve all orders with a LEFT JOIN. Explain discount NULL meanings separately; do not infer business semantics from NULL alone."
         ],
         "tasks": [
-          "Classify each NULL column by meaning",
-          "Propose a representation for each meaning",
-          "Write queries that handle NULLs safely",
-          "Write one query that produces a wrong total if NULLs are mishandled, then fix it"
+          "Auditable order totals: produce the declared output columns.",
+          "Explain correctness, edge cases, and production-scale performance separately."
         ],
         "constraints": [
-          "PostgreSQL-style SQL",
-          "No use of COALESCE to hide semantics"
+          "Executable dialect: DuckDB 1.5.5. One SELECT (including CTEs) per answer tab.",
+          "The local dataset is intentionally small; runtime does not establish production-scale performance.",
+          "Checks assess result correctness only. Output names, types, precision, and ordering are specified in the workspace."
         ],
         "deliverables": [
-          "NULL classification table",
-          "Safe-handling queries",
-          "Wrong-then-right example"
+          "Auditable order totals SQL",
+          "Written reasoning and performance notes"
         ]
       },
       "internal": {
@@ -4758,7 +6969,243 @@
         "A source starts sending empty strings instead of NULLs.",
         "A regulatory report must distinguish unknown from zero."
       ],
-      "review_exercise": "Write three test rows and show which ones your query treats as unknown, not applicable and not yet arrived."
+      "review_exercise": "Write three test rows and show which ones your query treats as unknown, not applicable and not yet arrived.",
+      "sql_playground": {
+        "version": 1,
+        "dialect": "duckdb",
+        "tables": [
+          {
+            "name": "fact_orders",
+            "description": "Business statuses describe missing values. Unknown customer IDs remain unknown; join using LEFT JOIN.",
+            "columns": [
+              {
+                "name": "order_id",
+                "type": "BIGINT",
+                "nullable": false,
+                "key": "Primary key"
+              },
+              {
+                "name": "customer_id",
+                "type": "BIGINT",
+                "nullable": true,
+                "key": ""
+              },
+              {
+                "name": "ship_cost",
+                "type": "DECIMAL(12,2)",
+                "nullable": true,
+                "key": ""
+              },
+              {
+                "name": "shipping_state",
+                "type": "VARCHAR",
+                "nullable": false,
+                "key": "One of known, unknown, not_applicable, pending"
+              },
+              {
+                "name": "discount_pct",
+                "type": "DECIMAL(5,4)",
+                "nullable": true,
+                "key": ""
+              },
+              {
+                "name": "discount_state",
+                "type": "VARCHAR",
+                "nullable": false,
+                "key": "One of known, unknown, not_applicable, pending"
+              }
+            ]
+          },
+          {
+            "name": "customers",
+            "description": "Known customer records; some fact IDs have no dimension row.",
+            "columns": [
+              {
+                "name": "customer_id",
+                "type": "BIGINT",
+                "nullable": false,
+                "key": "Primary key"
+              },
+              {
+                "name": "customer_name",
+                "type": "VARCHAR",
+                "nullable": false,
+                "key": ""
+              }
+            ]
+          }
+        ],
+        "visible_fixture": {
+          "fact_orders": [
+            [
+              1,
+              1,
+              "10",
+              "known",
+              "0.1000",
+              "known"
+            ],
+            [
+              2,
+              null,
+              null,
+              "pending",
+              null,
+              "not_applicable"
+            ],
+            [
+              3,
+              2,
+              null,
+              "unknown",
+              null,
+              "unknown"
+            ],
+            [
+              4,
+              99,
+              null,
+              "not_applicable",
+              "0.0000",
+              "known"
+            ],
+            [
+              5,
+              1,
+              "0",
+              "known",
+              null,
+              "pending"
+            ]
+          ],
+          "customers": [
+            [
+              1,
+              "Ada"
+            ],
+            [
+              2,
+              "Bo"
+            ]
+          ]
+        },
+        "tasks": [
+          {
+            "id": "report",
+            "title": "Auditable order totals",
+            "description": "Return one summary row with total order count, known shipping-cost sum (decimal zero if none), counts of unknown/not_applicable/pending shipping states, and unmatched-customer count (including NULL IDs). Count each fact once. Preserve all orders with a LEFT JOIN. Explain discount NULL meanings separately; do not infer business semantics from NULL alone.",
+            "columns": [
+              {
+                "name": "order_count",
+                "type": "integer"
+              },
+              {
+                "name": "known_shipping_total",
+                "type": "decimal",
+                "scale": 2
+              },
+              {
+                "name": "unknown_count",
+                "type": "integer"
+              },
+              {
+                "name": "not_applicable_count",
+                "type": "integer"
+              },
+              {
+                "name": "pending_count",
+                "type": "integer"
+              },
+              {
+                "name": "unmatched_customer_count",
+                "type": "integer"
+              }
+            ],
+            "ordered": false
+          }
+        ],
+        "assessment": {
+          "fixtures": [
+            {
+              "fact_orders": [],
+              "customers": []
+            },
+            {
+              "fact_orders": [
+                [
+                  1,
+                  1,
+                  "10",
+                  "known",
+                  "0.1000",
+                  "known"
+                ],
+                [
+                  2,
+                  null,
+                  null,
+                  "pending",
+                  null,
+                  "not_applicable"
+                ],
+                [
+                  3,
+                  2,
+                  null,
+                  "unknown",
+                  null,
+                  "unknown"
+                ],
+                [
+                  4,
+                  99,
+                  null,
+                  "not_applicable",
+                  "0.0000",
+                  "known"
+                ],
+                [
+                  5,
+                  1,
+                  "0",
+                  "known",
+                  null,
+                  "pending"
+                ],
+                [
+                  6,
+                  null,
+                  "5.50",
+                  "known",
+                  null,
+                  "unknown"
+                ],
+                [
+                  7,
+                  2,
+                  null,
+                  "pending",
+                  null,
+                  "pending"
+                ]
+              ],
+              "customers": [
+                [
+                  1,
+                  "Ada"
+                ],
+                [
+                  2,
+                  "Bo"
+                ]
+              ]
+            }
+          ],
+          "reference_queries": {
+            "report": "SELECT COUNT(*) AS order_count,CAST(COALESCE(SUM(CASE WHEN o.shipping_state='known' THEN o.ship_cost END),0) AS DECIMAL(18,2)) AS known_shipping_total,\n      COUNT(*) FILTER(WHERE o.shipping_state='unknown') AS unknown_count,\n      COUNT(*) FILTER(WHERE o.shipping_state='not_applicable') AS not_applicable_count,\n      COUNT(*) FILTER(WHERE o.shipping_state='pending') AS pending_count,\n      COUNT(*) FILTER(WHERE c.customer_id IS NULL) AS unmatched_customer_count\n      FROM fact_orders o LEFT JOIN customers c ON o.customer_id=c.customer_id"
+          }
+        }
+      }
     },
     {
       "id": "CM-001",
@@ -4833,7 +7280,8 @@
         "A patient can be referred by another doctor.",
         "Appointments can be rescheduled and the original slot must be remembered."
       ],
-      "review_exercise": "Redraw the same domain with the opposite abstraction choice for one entity and explain what changes."
+      "review_exercise": "Redraw the same domain with the opposite abstraction choice for one entity and explain what changes.",
+      "diagram_kind": "conceptual_erd"
     },
     {
       "id": "CM-002",
@@ -4904,7 +7352,8 @@
         "Fines can be waived and the waiver needs to be remembered.",
         "Rare items may not have an ISBN."
       ],
-      "review_exercise": "Take one M:N relationship and write both its conceptual form and its logical form in one sentence each."
+      "review_exercise": "Take one M:N relationship and write both its conceptual form and its logical form in one sentence each.",
+      "diagram_kind": "conceptual_erd"
     },
     {
       "id": "CM-003",
@@ -4975,7 +7424,8 @@
         "Add an employee dimension that also participates in a separate labor fact.",
         "Reorganize the product hierarchy and keep both the historical and current views."
       ],
-      "review_exercise": "Redraw the star with every dimension labelled 'SCD1', 'SCD2' or 'static' and defend each choice in one line."
+      "review_exercise": "Redraw the star with every dimension labelled 'SCD1', 'SCD2' or 'static' and defend each choice in one line.",
+      "diagram_kind": "star_schema"
     },
     {
       "id": "CM-004",

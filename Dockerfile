@@ -1,7 +1,15 @@
+FROM node:22-slim AS frontend
+WORKDIR /frontend
+COPY erd_frontend/package*.json ./
+RUN npm ci
+COPY erd_frontend ./
+RUN npm run build
+
 FROM python:3.11-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
+    BUNDLED_CHALLENGES_PATH=/app/bundled_data/challenges.json \
     STREAMLIT_SERVER_HEADLESS=true \
     STREAMLIT_SERVER_ADDRESS=0.0.0.0 \
     STREAMLIT_SERVER_PORT=8501 \
@@ -15,8 +23,14 @@ RUN python -m pip install --no-cache-dir -r requirements.txt \
     && chown -R 10001:10001 /app
 
 COPY --chown=10001:10001 app.py ./
+COPY --chown=10001:10001 .streamlit ./.streamlit
 COPY --chown=10001:10001 src ./src
+COPY --from=frontend --chown=10001:10001 /src/erd_assets ./src/erd_assets
+COPY --from=frontend --chown=10001:10001 /src/sql_assets ./src/sql_assets
+COPY --chown=10001:10001 erd_frontend/THIRD_PARTY_LICENSES.txt ./src/erd_assets/THIRD_PARTY_LICENSES.txt
+COPY --chown=10001:10001 erd_frontend/SQL_THIRD_PARTY_LICENSES.txt ./src/sql_assets/THIRD_PARTY_LICENSES.txt
 COPY --chown=10001:10001 data ./data
+COPY --chown=10001:10001 data ./bundled_data
 
 USER 10001:10001
 EXPOSE 8501

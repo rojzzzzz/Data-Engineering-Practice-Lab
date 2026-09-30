@@ -2,16 +2,39 @@
 from __future__ import annotations
 
 import json
+import math
 from collections import Counter
 from pathlib import Path
 from typing import Any
+from src.diagrams import KINDS
+from src.sql_models import validate_exercise
 
 REQUIRED = ("id", "title", "type", "difficulty", "estimated_minutes", "rubric_ref", "student")
 STUDENT_FIELDS = ("scenario", "requirements", "tasks", "constraints", "deliverables")
 
 
 def validate_bank(source: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    if not isinstance(source, dict):
+        raise ValueError("A challenge bank must be a JSON object")
     bank = json.loads(json.dumps(source))
+    for field in ("bank", "rubrics", "prompt_templates"):
+        if not isinstance(bank.get(field, {}), dict):
+            raise ValueError(f"{field} must be an object")
+    metadata = bank.get("bank", {})
+    for field in ("challenge_families", "learning_paths"):
+        values = metadata.get(field, [])
+        if not isinstance(values, list) or any(not isinstance(value, dict) for value in values):
+            raise ValueError(f"bank.{field} must be a list of objects")
+    for path in metadata.get("learning_paths", []):
+        if not isinstance(path.get("name"), str) or not isinstance(path.get("challenges", []), list):
+            raise ValueError("Learning paths need a name and a challenges list")
+    for field in ("topic_index", "prerequisite_graph"):
+        if not isinstance(metadata.get(field, {}), dict):
+            raise ValueError(f"bank.{field} must be an object")
+        if any(not isinstance(values, list) for values in metadata.get(field, {}).values()):
+            raise ValueError(f"bank.{field} values must be lists")
+    if not isinstance(bank.get("mistake_categories", []), list) or any(not isinstance(v, str) for v in bank.get("mistake_categories", [])):
+        raise ValueError("mistake_categories must be a list of strings")
     issues: list[dict[str, Any]] = []
     def issue(kind: str, message: str, **details: Any) -> None:
         issues.append({"kind": kind, "message": message, **details})
@@ -32,11 +55,28 @@ def validate_bank(source: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any
     for i, c in enumerate(challenges):
         if not isinstance(c, dict):
             issue("invalid_challenge", "Challenge entry is not an object", index=i); continue
+        if "sql_playground" in c:
+            validate_exercise(c["sql_playground"])
+        for field in ("id", "title", "type", "rubric_ref"):
+            if not isinstance(c.get(field), str) or not c[field].strip():
+                raise ValueError(f"Challenge {i + 1}: {field} must be a non-empty string")
+        minutes = c.get("estimated_minutes")
+        if type(minutes) not in (int, float) or not math.isfinite(minutes) or minutes <= 0:
+            raise ValueError(f"Challenge {c['id']}: estimated_minutes must be positive and finite")
+        for field in ("hints", "follow_up_complications", "artifacts_required"):
+            values = c.get(field, [])
+            if not isinstance(values, list) or any(not isinstance(v, str) for v in values):
+                raise ValueError(f"Challenge {c['id']}: {field} must be a list of strings")
+        internal = c.get("internal", {})
+        if not isinstance(internal, dict) or not isinstance(internal.get("topics", []), list) or any(not isinstance(v, str) for v in internal.get("topics", [])):
+            raise ValueError(f"Challenge {c['id']}: internal.topics must be a list of strings")
         for f in REQUIRED:
             if f not in c or c[f] in (None, ""):
                 issue("missing_required_field", f"Missing required field: {f}", challenge_id=c.get("id"), field=f)
-        if c.get("difficulty") not in (1, 2, 3, 4, 5):
+        if type(c.get("difficulty")) is not int or c["difficulty"] not in (1, 2, 3, 4, 5):
             issue("invalid_difficulty", "Difficulty must be an integer from 1 to 5", challenge_id=c.get("id"), value=c.get("difficulty"))
+        if c.get("diagram_kind") is not None and (not isinstance(c["diagram_kind"],str) or c["diagram_kind"] not in KINDS):
+            issue("invalid_diagram_kind", "Unsupported diagram kind", challenge_id=c.get("id"), value=c["diagram_kind"])
         if c.get("rubric_ref") not in bank.get("rubrics", {}):
             issue("unknown_rubric", "Challenge references an unknown rubric", challenge_id=c.get("id"), rubric_ref=c.get("rubric_ref"))
         if not isinstance(c.get("student"), dict):
@@ -45,10 +85,14 @@ def validate_bank(source: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any
             for f in STUDENT_FIELDS:
                 if f not in c["student"]:
                     issue("missing_student_field", f"Student field absent: {f}", challenge_id=c.get("id"), field=f)
+                elif (f == "scenario" and not isinstance(c["student"][f], str)) or (f != "scenario" and (not isinstance(c["student"][f], list) or any(not isinstance(v, str) for v in c["student"][f]))):
+                    raise ValueError(f"Challenge {c['id']}: invalid student.{f}")
         hints = c.get("hints", [])
         if hints and (not isinstance(hints, list) or len(hints) != 3):
             issue("hint_count", "Supplied hints should contain exactly three progressive levels", challenge_id=c.get("id"), actual=len(hints) if isinstance(hints,list) else None)
     for name, rubric in bank.get("rubrics", {}).items():
+        if not isinstance(rubric, dict) or any(type(v) not in (int, float) or not math.isfinite(v) or v < 0 for v in rubric.values()):
+            raise ValueError(f"Rubric {name}: categories must contain non-negative finite numbers")
         if not isinstance(rubric, dict) or sum(v for v in rubric.values() if isinstance(v, (int,float))) != 100:
             issue("rubric_total", "Rubric categories must total 100 points", rubric=name, total=sum(v for v in rubric.values() if isinstance(v,(int,float))) if isinstance(rubric,dict) else None)
 
@@ -62,24 +106,11 @@ def validate_bank(source: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any
             fam["count"] = actual
             issue("derived_metadata_corrected", "Declared family count recalculated from challenge IDs", prefix=prefix, previous=declared, actual=actual)
 
-    def clean_refs(container: Any, path: str) -> None:
-        if isinstance(container, dict):
-            for k, v in container.items():
-                if isinstance(v, list) and (k in {"challenges", "prerequisites"} or path == "topic_index"):
-                    kept = [ref for ref in v if ref in id_set]
-                    for ref in v:
-                        if ref not in id_set:
-                            issue("dangling_reference", "Removed reference to nonexistent challenge", location=f"{path}.{k}", reference=ref)
-                    container[k] = kept
-                else:
-                    clean_refs(v, f"{path}.{k}")
-        elif isinstance(container, list):
-            for n, item in enumerate(container): clean_refs(item, f"{path}[{n}]")
     for lp in bank.get("bank", {}).get("learning_paths", []):
         if isinstance(lp.get("challenges"), list):
-            kept = [ref for ref in lp["challenges"] if ref in id_set]
+            kept = [ref for ref in lp["challenges"] if isinstance(ref, str) and ref in id_set]
             for ref in lp["challenges"]:
-                if ref not in id_set: issue("dangling_reference", "Removed reference to nonexistent challenge", location=f"learning_paths.{lp.get('name')}", reference=ref)
+                if not isinstance(ref, str) or ref not in id_set: issue("dangling_reference", "Removed reference to nonexistent challenge", location=f"learning_paths.{lp.get('name')}", reference=ref)
             lp["challenges"] = kept
     graph = bank.get("bank", {}).get("prerequisite_graph", {})
     if isinstance(graph, dict):
@@ -89,29 +120,31 @@ def validate_bank(source: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any
                 del graph[key]
                 continue
             if isinstance(vals, list):
-                kept = [v for v in vals if v in id_set]
+                kept = [v for v in vals if isinstance(v, str) and v in id_set]
                 for v in vals:
-                    if v not in id_set: issue("dangling_reference", "Removed reference to nonexistent challenge", location=f"prerequisite_graph.{key}", reference=v)
+                    if not isinstance(v, str) or v not in id_set: issue("dangling_reference", "Removed reference to nonexistent challenge", location=f"prerequisite_graph.{key}", reference=v)
                 graph[key] = kept
     topics = bank.get("bank", {}).get("topic_index", {})
     if isinstance(topics, dict):
         for topic, vals in list(topics.items()):
             if isinstance(vals, list):
-                kept = [v for v in vals if v in id_set]
+                kept = [v for v in vals if isinstance(v, str) and v in id_set]
                 for v in vals:
-                    if v not in id_set: issue("dangling_reference", "Removed reference to nonexistent challenge", location=f"topic_index.{topic}", reference=v)
+                    if not isinstance(v, str) or v not in id_set: issue("dangling_reference", "Removed reference to nonexistent challenge", location=f"topic_index.{topic}", reference=v)
                 topics[topic] = kept
     templates = bank.get("prompt_templates", {})
     for name in ("student", "hint", "evaluation"):
         if not isinstance(templates.get(name), str) or not templates[name].strip():
             issue("prompt_template", "Missing or empty prompt template", template=name)
+    invalid_diagrams = {finding.get("challenge_id") for finding in issues if finding["kind"] == "invalid_diagram_kind"}
     valid_count=0
     for c in challenges:
         if not isinstance(c,dict): continue
         student=c.get("student")
         if (all(f in c and c[f] not in (None,"") for f in REQUIRED)
             and isinstance(c.get("id"),str) and id_counts[c["id"]]==1
-            and c.get("difficulty") in (1,2,3,4,5)
+            and type(c.get("difficulty")) is int and c["difficulty"] in (1,2,3,4,5)
+            and c["id"] not in invalid_diagrams
             and c.get("rubric_ref") in bank.get("rubrics",{})
             and isinstance(student,dict) and all(f in student for f in STUDENT_FIELDS)):
             valid_count+=1

@@ -3,3 +3,6 @@ __pycache__/
 .venv/
 *.py[cod]
 database/practice.db
+erd_frontend/node_modules/
+.runtime-deps/
+.test-runtime/

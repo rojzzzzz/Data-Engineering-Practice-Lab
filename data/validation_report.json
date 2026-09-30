@@ -1,7 +1,7 @@
 {
   "json_syntax": "valid",
   "source_challenge_count": 58,
-  "declared_challenge_count": 59,
+  "declared_challenge_count": 58,
   "normalized_challenge_count": 58,
   "actual_family_counts": {
     "SCN": 8,
@@ -34,14 +34,7 @@
     "review": 100
   },
   "duplicate_ids": [],
-  "issues": [
-    {
-      "kind": "derived_metadata_corrected",
-      "message": "bank.challenge_count corrected to actual array length",
-      "declared": 59,
-      "actual": 58
-    }
-  ],
-  "issue_count": 1,
+  "issues": [],
+  "issue_count": 0,
   "valid_challenges": 58
 }

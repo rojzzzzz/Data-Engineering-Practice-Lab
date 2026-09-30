@@ -1,0 +1,85 @@
+:root { --ink:#172a36; --muted:#64747d; --paper:#f5f7f5; --surface:#ffffff; --line:#e1e8e5; --teal:#0b766e; --teal-dark:#075b56; --mint:#e5f3ee; --gold:#d79643; }
+html, body, .stApp { font-family:'Segoe UI',sans-serif; color:var(--ink); }
+.stApp { background:var(--paper); }
+[data-testid="stAppViewContainer"] > .main { background:var(--paper); }
+[data-testid="stHeader"] { background:var(--paper) !important; color:var(--ink) !important; }
+/* The toolbar also contains the sidebar toggle. Never hide it. */
+[data-testid="stExpandSidebarButton"] { background:var(--surface); border:1px solid var(--line); border-radius:8px; min-width:44px; min-height:40px; }
+[data-testid="stExpandSidebarButton"]::after { content:"Menu"; font-size:.85rem; font-weight:600; margin:0 .6rem 0 .25rem; }
+[data-testid="stExpandSidebarButton"] * { color:var(--ink) !important; }
+[data-testid="stSidebarCollapseButton"] { visibility:visible !important; }
+[data-testid="stSidebarCollapseButton"] button { min-width:40px; min-height:36px; }
+[data-testid="stSidebarCollapseButton"] * { color:#e5f3ee !important; }
+[data-testid="stMainBlockContainer"] { max-width:1360px; padding-top:5rem; padding-bottom:4rem; }
+[data-testid="stMain"] { color:var(--ink) !important; }
+[data-testid="stMain"] [data-testid="stMarkdownContainer"],
+[data-testid="stMain"] [data-testid="stCaptionContainer"],
+[data-testid="stMain"] [data-testid="stWidgetLabel"] p,
+[data-testid="stMain"] label { color:var(--ink) !important; }
+[data-testid="stMain"] [data-testid="stCaptionContainer"] { color:var(--muted) !important; opacity:1; }
+[data-testid="stMain"] [data-testid="stCaptionContainer"] p { color:var(--muted) !important; }
+h1,h2,h3 { font-family:'Aptos Display','Segoe UI',sans-serif !important; color:var(--ink) !important; letter-spacing:-.035em; }
+h1 { font-size:2.35rem !important; font-weight:800 !important; }
+h2 { font-size:1.55rem !important; font-weight:750 !important; }
+h3 { font-size:1.12rem !important; font-weight:700 !important; }
+p,li { line-height:1.65; }
+[data-testid="stSidebar"] { background:#132c36; border-right:1px solid #24414a; }
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p { color:#d4e2df !important; }
+[data-testid="stSidebar"] h1,[data-testid="stSidebar"] h2,[data-testid="stSidebar"] h3 { color:white !important; }
+[data-testid="stSidebar"] [data-testid="stRadio"] > label { color:#9fb6b5 !important; font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+[data-testid="stSidebar"] [role="radiogroup"] { gap:.35rem; }
+[data-testid="stSidebar"] [role="radiogroup"] label { border-radius:10px; padding:.48rem .6rem; transition:background .15s ease; }
+[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) { background:#24444b; color:white !important; }
+[data-testid="stSidebar"] [data-testid="stCheckbox"] label { color:#d4e2df !important; }
+[data-testid="stSidebar"] hr { border-color:#34505a; }
+[data-testid="stSidebar"] [data-testid="stExpander"] { background:#193640; border-color:#34505a; }
+[data-testid="stSidebar"] [data-testid="stExpander"] summary,
+[data-testid="stSidebar"] [data-testid="stExpander"] summary span { color:#f0f7f5 !important; }
+[data-testid="stSidebar"] [data-testid="stExpander"] summary { background:#193640 !important; }
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p { color:#b8ceca !important; }
+[data-testid="stMetric"] { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:1rem 1.15rem; box-shadow:0 2px 8px #173c3510; }
+[data-testid="stMetricLabel"] p { color:var(--muted) !important; font-size:.78rem !important; font-weight:600 !important; }
+[data-testid="stMetricValue"] { color:var(--ink) !important; font-family:'Aptos Display','Segoe UI',sans-serif; font-weight:750; }
+[data-testid="stVerticalBlockBorderWrapper"] { border-color:var(--line) !important; border-radius:16px !important; background:var(--surface); }
+[data-testid="stExpander"] { background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+[data-testid="stExpander"] summary { color:var(--ink); font-weight:650; }
+[data-testid="stTextInput"] input,[data-testid="stNumberInput"] input,[data-testid="stTextArea"] textarea,
+[data-testid="stSelectbox"] [data-baseweb="select"] > div,[data-testid="stMultiSelect"] [data-baseweb="select"] > div { background:#fff !important; color:var(--ink) !important; border-color:#d5dfdc; border-radius:9px; }
+[data-testid="stTextInput"] input,[data-testid="stNumberInput"] input,[data-testid="stTextArea"] textarea { background:#fff !important; color:var(--ink) !important; border-color:#d5dfdc; border-radius:9px; }
+/* Current Streamlit uses React Aria; older versions use Base Web. */
+[data-testid="stSelectbox"] [role="group"], [data-testid="stMultiSelect"] [role="group"] { background:#fff !important; color:var(--ink) !important; border:1px solid #d5dfdc; border-radius:9px; }
+[data-testid="stSelectbox"] input, [data-testid="stSelectbox"] button,
+[data-testid="stMultiSelect"] input, [data-testid="stMultiSelect"] button { background:transparent !important; color:var(--ink) !important; }
+[role="listbox"] { background:#fff !important; color:var(--ink) !important; border:1px solid var(--line); }
+[role="option"] { color:var(--ink) !important; }
+[role="option"][data-focused="true"], [role="option"][aria-selected="true"] { background:var(--mint) !important; }
+[data-testid="stSelectbox"] [data-baseweb="select"] *,[data-testid="stMultiSelect"] [data-baseweb="select"] * { color:var(--ink) !important; }
+[data-baseweb="popover"] [role="option"] { background:#fff !important; color:var(--ink) !important; }
+[data-testid="stTextArea"] textarea:focus,[data-testid="stTextInput"] input:focus { border-color:var(--teal); box-shadow:0 0 0 1px var(--teal); }
+.stButton > button,.stDownloadButton > button { background:#fff; color:var(--ink); border-radius:9px; font-weight:650; border:1px solid #d3dfdb; transition:all .15s ease; }
+.stButton > button[kind="primary"],[data-testid="stBaseButton-primary"] { background:var(--teal); color:white; border-color:var(--teal); }
+.stButton > button[kind="primary"]:hover,[data-testid="stBaseButton-primary"]:hover { background:var(--teal-dark); border-color:var(--teal-dark); }
+.stButton > button:hover,.stDownloadButton > button:hover { border-color:var(--teal); color:var(--teal-dark); }
+[data-testid="stMain"] button[kind="primary"] [data-testid="stMarkdownContainer"],
+[data-testid="stMain"] button[kind="primary"]:hover { color:#fff !important; }
+button:focus-visible { outline:3px solid #48a798 !important; outline-offset:3px; }
+[data-testid="stDataFrame"], [data-testid="stTable"] { border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+[data-testid="stAlert"] { border-radius:11px; }
+[data-testid="stFileUploader"] section { background:#fff; border:1px dashed #9eb9b1; border-radius:12px; }
+hr { border-color:var(--line); }
+.brand-lockup { padding:.65rem .15rem 1.05rem; border-bottom:1px solid #34505a; margin-bottom:1.15rem; }
+.brand-lockup .brand-mark { width:34px; height:34px; display:grid; place-items:center; background:#d5eee6; color:#075b56; border-radius:10px; font-size:1.1rem; margin-bottom:.75rem; }
+.brand-lockup .brand-name { color:#fff; font:800 1.03rem 'Aptos Display','Segoe UI',sans-serif; letter-spacing:-.03em; }
+.brand-lockup .brand-note { color:#9fb6b5; font-size:.72rem; margin-top:.18rem; }
+.page-hero { padding:0 0 1.35rem; margin-bottom:.65rem; border-bottom:1px solid var(--line); }
+.page-hero .eyebrow { color:var(--teal); font-size:.72rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; margin:0 0 .45rem; }
+.page-hero h1 { margin:0; }
+.page-hero .subline { color:var(--muted); margin:.5rem 0 0; max-width:780px; }
+.mode-card { min-height:160px; box-sizing:border-box; padding:1rem; margin:.1rem 0 .3rem; border:1px solid var(--line); border-radius:13px; background:var(--surface); }
+.mode-card.is-active { border-color:var(--teal); background:var(--mint); box-shadow:inset 0 3px 0 var(--teal); }
+.mode-card .mode-icon { color:var(--teal); font-size:1.2rem; font-weight:700; }
+.mode-card .mode-title { color:var(--ink); font-weight:700; margin:.3rem 0 .12rem; }
+.mode-card .mode-copy { color:var(--muted); font-size:.78rem; line-height:1.4; }
+@media (max-width: 800px) { [data-testid="stMainBlockContainer"] { padding:5rem 1rem 3rem; } h1 { font-size:1.9rem !important; } }

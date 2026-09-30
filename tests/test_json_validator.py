@@ -25,9 +25,34 @@ def test_rubric_total_validation():
     assert any(i["kind"]=="rubric_total" for i in report["issues"])
 
 def test_new_challenge_bank_uses_all_58_objects():
-    source=json.loads((Path(__file__).resolve().parents[1]/"data"/"deepseek_json_20260922_8e7847.json").read_text(encoding="utf-8"))
+    source=json.loads((Path(__file__).resolve().parents[1]/"data"/"challenges.json").read_text(encoding="utf-8"))
     normalized,report=validate_bank(source)
     assert len(normalized["challenges"])==58
     assert report["valid_challenges"]==58
     assert normalized["bank"]["challenge_count"]==58
     assert not report["duplicate_ids"]
+
+
+def test_invalid_runtime_types_are_rejected():
+    import pytest
+    for field, value in [('estimated_minutes', 'fast'), ('id', []), ('rubric_ref', {}), ('hints', [1])]:
+        source = minimal()
+        source['challenges'][0][field] = value
+        with pytest.raises(ValueError):
+            validate_bank(source)
+
+
+def test_boolean_difficulty_is_not_valid():
+    source = minimal()
+    source['challenges'][0]['difficulty'] = True
+    _, report = validate_bank(source)
+    assert any(issue['kind'] == 'invalid_difficulty' for issue in report['issues'])
+    assert report['valid_challenges'] == 0
+
+
+def test_malformed_reference_is_reported_instead_of_crashing():
+    source = minimal()
+    source['bank']['topic_index']['x'].append({})
+    normalized, report = validate_bank(source)
+    assert normalized['bank']['topic_index']['x'] == ['A-1']
+    assert any(issue.get('reference') == {} for issue in report['issues'])
