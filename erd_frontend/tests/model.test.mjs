@@ -1,6 +1,19 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { removeElements } from "../src/model.ts";
+import { removeElements, arrangeEntities } from "../src/model.ts";
+import { quoteIdentifier, selectQuery } from "../src/sql_helpers.ts";
+
+test("SELECT builder quotes identifiers and uses only selected columns", () => {
+  assert.equal(quoteIdentifier('a"b'), '"a""b"');
+  assert.equal(
+    selectQuery("order", ["id", "amount"]),
+    'SELECT\n  "id",\n  "amount"\nFROM "order"\nLIMIT 100;',
+  );
+  assert.equal(
+    selectQuery("sales", []),
+    'SELECT\n  *\nFROM "sales"\nLIMIT 100;',
+  );
+});
 
 const diagram = {
   version: 1,
@@ -12,6 +25,29 @@ const diagram = {
     { id: "ac", source: "a", target: "c" },
   ],
 };
+
+test("tidy layout leaves room for tall tables and preserves model content", () => {
+  const input = {
+    ...diagram,
+    entities: diagram.entities.map((e, i) => ({
+      ...e,
+      position: { x: 0, y: 0 },
+      fields: Array(i === 0 ? 30 : 2).fill({}),
+      annotation: i === 0 ? "Notes" : "",
+    })),
+  };
+  const result = arrangeEntities(input);
+  assert.equal(result.entities[0].position.y, result.entities[1].position.y);
+  assert.ok(
+    result.entities[2].position.y >
+      result.entities[0].position.y + 30 * 30 + 140,
+  );
+  assert.equal(result.relationships, input.relationships);
+  assert.equal(result.entities[0].fields, input.entities[0].fields);
+  assert.deepEqual(input.entities[0].position, { x: 0, y: 0 });
+  assert.deepEqual(arrangeEntities(result), result);
+  assert.deepEqual(arrangeEntities({ ...input, entities: [] }).entities, []);
+});
 
 test("deleting an entity removes only its incident relationships", () => {
   const result = removeElements(diagram, ["b"]);

@@ -29,6 +29,6 @@ def erd_editor(attempt_id: int, kind: str, diagram: dict | None):
         data={"attemptId": attempt_id, "kind": kind, "diagram": value},
         default={"diagram": value},
         on_diagram_change=lambda: None,
-        height=620,
+        height="content",
     )
     return result.diagram

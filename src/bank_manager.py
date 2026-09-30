@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import re
 import shutil
+from copy import deepcopy
 from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
@@ -112,46 +113,68 @@ def merge_banks(current: dict[str, Any], incoming: dict[str, Any]) -> dict[str, 
 
 def sync_bundled_sql(current: dict[str, Any], bundled: dict[str, Any]) -> dict[str, Any]:
     """Refresh image-shipped SQL questions in a persisted bank without dropping custom questions."""
-    merged = json.loads(json.dumps(current))
-    by_id = {c.get("id"): i for i, c in enumerate(merged.get("challenges", [])) if isinstance(c, dict)}
-    sql_challenges = [c for c in bundled.get("challenges", []) if c.get("sql_playground")]
-    sql_ids = {c["id"] for c in sql_challenges}
-    for challenge in sql_challenges:
-        if challenge["id"] in by_id:
-            merged["challenges"][by_id[challenge["id"]]] = challenge
-        else:
-            by_id[challenge["id"]] = len(merged["challenges"])
-            merged["challenges"].append(challenge)
+    merged = deepcopy(current)
+    challenges = merged.setdefault("challenges", [])
+    bundled_challenges = bundled.get("challenges", [])
+    sql_challenges = [challenge for challenge in bundled_challenges if challenge.get("sql_playground")]
+    sql_ids = {challenge["id"] for challenge in sql_challenges}
+    challenge_indexes = {
+        challenge.get("id"): index
+        for index, challenge in enumerate(challenges)
+        if isinstance(challenge, dict)
+    }
 
+    for challenge in sql_challenges:
+        challenge_id = challenge["id"]
+        if challenge_id in challenge_indexes:
+            challenges[challenge_indexes[challenge_id]] = deepcopy(challenge)
+        else:
+            challenge_indexes[challenge_id] = len(challenges)
+            challenges.append(deepcopy(challenge))
+
+    sql_rubrics = {challenge["rubric_ref"] for challenge in sql_challenges}
     for name, rubric in bundled.get("rubrics", {}).items():
-        if any(c.get("rubric_ref") == name for c in sql_challenges):
-            merged.setdefault("rubrics", {})[name] = rubric
+        if name in sql_rubrics:
+            merged.setdefault("rubrics", {})[name] = deepcopy(rubric)
+
     metadata = merged.setdefault("bank", {})
     source_metadata = bundled.get("bank", {})
-    families = {item.get("prefix"): item for item in metadata.get("challenge_families", []) if isinstance(item, dict)}
-    for item in source_metadata.get("challenge_families", []):
-        if item.get("prefix") == "SQL":
-            families[item["prefix"]] = item
+    families = {
+        family.get("prefix"): family
+        for family in metadata.get("challenge_families", [])
+        if isinstance(family, dict)
+    }
+    sql_families = {challenge_id.split("-", 1)[0] for challenge_id in sql_ids}
+    for family in source_metadata.get("challenge_families", []):
+        if family.get("prefix") in sql_families:
+            families[family["prefix"]] = deepcopy(family)
     metadata["challenge_families"] = list(families.values())
-    for field in ("learning_paths",):
-        paths = {item.get("name"): item for item in metadata.get(field, []) if isinstance(item, dict)}
-        for item in source_metadata.get(field, []):
-            sql_refs = [cid for cid in item.get("challenges", []) if cid in sql_ids]
-            if not sql_refs:
-                continue
-            target = paths.setdefault(item["name"], {**item, "challenges": []})
-            target["challenges"] = list(dict.fromkeys(target.get("challenges", []) + sql_refs))
-        metadata[field] = list(paths.values())
-    for field in ("topic_index", "prerequisite_graph"):
-        target = metadata.setdefault(field, {})
-        for key, refs in source_metadata.get(field, {}).items():
-            selected = [ref for ref in refs if ref in sql_ids]
-            if field == "prerequisite_graph" and key in sql_ids:
-                target[key] = list(refs)
-            elif selected:
-                target.setdefault(key, [])
-                target[key] = list(dict.fromkeys(target[key] + selected))
-    metadata["challenge_count"] = len(merged["challenges"])
+
+    paths = {
+        path.get("name"): path
+        for path in metadata.get("learning_paths", [])
+        if isinstance(path, dict)
+    }
+    for path in source_metadata.get("learning_paths", []):
+        sql_refs = [challenge_id for challenge_id in path.get("challenges", []) if challenge_id in sql_ids]
+        if not sql_refs:
+            continue
+        target = paths.setdefault(path["name"], {**deepcopy(path), "challenges": []})
+        target["challenges"] = list(dict.fromkeys(target.get("challenges", []) + sql_refs))
+    metadata["learning_paths"] = list(paths.values())
+
+    topic_index = metadata.setdefault("topic_index", {})
+    for topic, references in source_metadata.get("topic_index", {}).items():
+        sql_refs = [challenge_id for challenge_id in references if challenge_id in sql_ids]
+        if sql_refs:
+            topic_index[topic] = list(dict.fromkeys(topic_index.get(topic, []) + sql_refs))
+
+    prerequisites = metadata.setdefault("prerequisite_graph", {})
+    for challenge_id, references in source_metadata.get("prerequisite_graph", {}).items():
+        if challenge_id in sql_ids:
+            prerequisites[challenge_id] = deepcopy(references)
+
+    metadata["challenge_count"] = len(challenges)
     return merged
 
 

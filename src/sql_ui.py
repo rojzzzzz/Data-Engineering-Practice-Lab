@@ -19,20 +19,27 @@ def stop_sql_job():
 
 
 def schema_browser(exercise):
-    with st.expander("SQL schema and sample data", expanded=True):
-        st.caption("DuckDB 1.5.5 · Small practice dataset · SELECT queries only")
-        for table in exercise["tables"]:
-            rows = exercise["visible_fixture"][table["name"]]
-            with st.expander(f"{table['name']} · {len(rows)} rows"):
-                st.write(table["description"])
-                st.dataframe(table["columns"], hide_index=True, width="stretch")
-                if rows:
-                    st.dataframe([dict(zip([c["name"] for c in table["columns"]], row)) for row in rows[:25]], hide_index=True, width="stretch")
-                else:
-                    st.caption("This table has no rows.")
-        schema = ddl(exercise)
-        st.code(schema, language="sql")
-        st.download_button("Download schema", schema, "exercise_schema.sql", "text/plain")
+    with st.expander(f"Dataset reference · {len(exercise['tables'])} tables · schema, samples & DDL", expanded=False):
+        st.caption("Explore the supplied practice data. The editor also keeps the schema beside your query.")
+        tables = {table["name"]: table for table in exercise["tables"]}
+        name = st.selectbox("Browse a table", list(tables), key="sql_schema_" + fingerprint(exercise)[:12])
+        table = tables[name]
+        rows = exercise["visible_fixture"][name]
+        st.write(table["description"])
+        st.caption(f"{len(rows):,} supplied rows · {len(table['columns'])} columns · DuckDB")
+        structure, samples, definition = st.tabs(["Columns & keys", "Sample data", "Schema DDL"])
+        with structure:
+            st.dataframe([{"Column": c["name"], "Type": c["type"], "Nullable": "Yes" if c["nullable"] else "No", "Documented key": c.get("key", "") or "—"} for c in table["columns"]], hide_index=True, width="stretch")
+        with samples:
+            if rows:
+                st.dataframe([dict(zip([c["name"] for c in table["columns"]], row)) for row in rows[:25]], hide_index=True, width="stretch")
+                st.caption(f"Showing {min(25, len(rows))} of {len(rows)} rows.")
+            else:
+                st.info("This table has no rows in the visible fixture.")
+        with definition:
+            schema = ddl(exercise)
+            st.code(schema, language="sql")
+            st.download_button("Download schema DDL", schema, "exercise_schema.sql", "text/plain")
 
 
 def render_workspace(database, attempt, exercise):
@@ -108,6 +115,7 @@ def render_workspace(database, attempt, exercise):
             st.caption("Assessment-style feedback. Checks do not award rubric points for reasoning or production performance.")
         last = st.session_state.get("sql_last_result")
         if not last:
+            st.caption("Results appear here after Run. Use the dataset explorer to insert a SELECT, or write your own query. Nothing executes while you type.")
             return
         result = last["result"]
         if not result.get("ok"):
@@ -115,8 +123,18 @@ def render_workspace(database, attempt, exercise):
         elif last["operation"] in ("run", "explain"):
             stale = last["exercise_hash"] != exercise_hash or last["drafts"].get(last["active"]) != workspace["drafts"].get(last["active"])
             revision = fingerprint(last["sql"])[:8]
-            st.markdown(f"**{'Execution plan' if last['operation']=='explain' else 'Query results'} · revision {revision}" + (" · Outdated**" if stale else "**"))
-            st.caption(f"{len(result['rows'])} rows displayed · {result['elapsed_ms']:.1f} ms execution · " + ", ".join(f"{n}: {t}" for n, t in zip(result["columns"], result["types"])))
+            title = next((t["title"] for t in exercise["tasks"] if t["id"] == last["active"]), "Scratch")
+            st.subheader("Execution plan" if last["operation"] == "explain" else "Query results")
+            st.caption(f"{title} · revision {revision}")
+            if stale:
+                st.warning("Outdated result — the query or exercise has changed. Run again to refresh.")
+            cols = st.columns(3)
+            cols[0].metric("Rows displayed", f"{len(result['rows']):,}")
+            cols[1].metric("Execution time", f"{result['elapsed_ms']:.1f} ms", help="Query execution and result fetch time; excludes worker startup and fixture preparation.")
+            cols[2].metric("Columns", len(result["columns"]))
+            with st.expander("Executed SQL & result types"):
+                st.code(last["sql"], language="sql")
+                st.dataframe([{"Column": n, "Type": t} for n, t in zip(result["columns"], result["types"])], hide_index=True, width="stretch")
             if result["truncated"]:
                 st.warning("Result truncated at 1,000 rows or 2 MB. Download contains only the displayed rows.")
             if last["operation"] == "explain":
@@ -124,8 +142,12 @@ def render_workspace(database, attempt, exercise):
             else:
                 # Positional columns preserve duplicate names in arbitrary scratch queries.
                 import pandas as pd
-                frame = pd.DataFrame(result["rows"], columns=[f"{i+1}: {name}" for i, name in enumerate(result["columns"])])
+                names = result["columns"]
+                labels = names if len(set(names)) == len(names) else [f"{i+1}: {name}" for i, name in enumerate(names)]
+                frame = pd.DataFrame(result["rows"], columns=labels)
                 st.dataframe(frame, hide_index=True, width="stretch")
+                if not result["rows"]:
+                    st.info("Query completed successfully and returned no rows.")
             contents = io.StringIO()
             writer = csv.writer(contents)
             writer.writerow(result["columns"])

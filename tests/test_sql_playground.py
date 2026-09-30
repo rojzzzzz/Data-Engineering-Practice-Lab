@@ -13,6 +13,17 @@ from src.sql_runner import SQLJob, validate_reference_queries
 from src.sql_worker import compare, query, ResourceLimit
 from src.database import init_db, save_attempt, get_attempt, save_sql_workspace, save_attempt_details, export_progress, merge_progress
 from src.prompt_builder import student_prompt, evaluation_prompt
+from src.sql_component import schema_payload
+
+
+def test_schema_explorer_payload_excludes_private_data(exercises):
+    exercise = exercises["SQL-001"]
+    payload = schema_payload(exercise)
+    for item, table in zip(payload, exercise["tables"]):
+        assert set(item) == set(table) | {"rowCount", "samples"}
+        assert item["rowCount"] == len(exercise["visible_fixture"][table["name"]])
+        assert item["samples"] == exercise["visible_fixture"][table["name"]][:10]
+    assert "reference_queries" not in json.dumps(payload)
 
 
 @pytest.fixture(scope="module")

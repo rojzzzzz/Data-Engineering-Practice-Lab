@@ -8,6 +8,7 @@ import { EditorView, keymap } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { sql, PostgreSQL } from "@codemirror/lang-sql";
 import { basicSetup } from "codemirror";
+import { quoteIdentifier, selectQuery } from "./sql_helpers";
 import "./sql.css";
 
 type Task = {
@@ -18,6 +19,14 @@ type Task = {
   columns: { name: string; type: string; scale?: number }[];
 };
 type Data = {
+  tables: {
+    name: string;
+    description: string;
+    rowCount: number;
+    columns: { name: string; type: string; nullable: boolean; key?: string }[];
+    samples: unknown[][];
+  }[];
+  ddl: string;
   attemptId: number;
   exerciseHash: string;
   drafts: Record<string, string>;
@@ -44,6 +53,16 @@ function Workspace({
 }) {
   const [active, setActive] = useState(data.active);
   const [drafts, setDrafts] = useState(data.drafts);
+  const [search, setSearch] = useState("");
+  const [tableName, setTableName] = useState(data.tables[0]?.name || "");
+  const [columns, setColumns] = useState<string[]>([]);
+  const [expanded, setExpanded] = useState(false);
+  const [selectionLength, setSelectionLength] = useState(0);
+  const [notice, setNotice] = useState("");
+  const states = useRef(new Map<string, EditorState>());
+  const createState = useRef<((doc: string) => EditorState) | undefined>(
+    undefined,
+  );
   const mount = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const current = useRef(drafts);
@@ -77,10 +96,9 @@ function Workspace({
   };
   useEffect(() => {
     if (!mount.current) return;
-    const editor = new EditorView({
-      parent: mount.current,
-      state: EditorState.create({
-        doc: current.current[activeRef.current] || "",
+    createState.current = (doc: string) =>
+      EditorState.create({
+        doc,
         extensions: [
           basicSetup,
           sql({ dialect: PostgreSQL, schema: data.schema }),
@@ -98,6 +116,11 @@ function Workspace({
             },
           ]),
           EditorView.updateListener.of((update) => {
+            if (update.selectionSet || update.docChanged)
+              setSelectionLength(
+                update.state.selection.main.to -
+                  update.state.selection.main.from,
+              );
             if (!update.docChanged) return;
             current.current = {
               ...current.current,
@@ -113,11 +136,14 @@ function Workspace({
             },
           }),
           EditorView.theme({
-            "&": { fontSize: "14px", height: "285px" },
+            "&": { fontSize: "14px" },
             ".cm-scroller": { overflow: "auto" },
           }),
         ],
-      }),
+      });
+    const editor = new EditorView({
+      parent: mount.current,
+      state: createState.current(current.current[activeRef.current] || ""),
     });
     view.current = editor;
     return () => {
@@ -127,118 +153,318 @@ function Workspace({
     };
   }, []);
   const changeTab = (id: string) => {
-    send("save");
+    if (id === activeRef.current) return;
+    const editor = view.current;
+    if (editor) states.current.set(activeRef.current, editor.state);
     activeRef.current = id;
     setActive(id);
-    const editor = view.current;
-    if (editor)
-      editor.dispatch({
-        changes: {
-          from: 0,
-          to: editor.state.doc.length,
-          insert: current.current[id] || "",
-        },
-      });
+    if (editor && createState.current)
+      editor.setState(
+        states.current.get(id) ||
+          createState.current(current.current[id] || ""),
+      );
+    setSelectionLength(
+      editor
+        ? editor.state.selection.main.to - editor.state.selection.main.from
+        : 0,
+    );
+    send("save");
   };
+  const insert = (text: string) => {
+    const editor = view.current;
+    if (!editor) return;
+    editor.dispatch(editor.state.replaceSelection(text));
+    editor.focus();
+    setNotice("Inserted into the active tab. Review the query before running.");
+  };
+  const table = data.tables.find((t) => t.name === tableName);
   const task = data.tasks.find((item) => item.id === active);
   const saved = JSON.stringify(drafts) === JSON.stringify(data.savedDrafts);
   return (
-    <div className="sql-workspace">
-      <div className="sql-tabs" role="tablist" aria-label="SQL answer tabs">
-        {[...data.tasks, { id: "scratch", title: "Scratch · ungraded" }].map(
-          (item) => (
+    <div className={`sql-workspace ${expanded ? "sql-expanded" : ""}`}>
+      <header className="sql-header">
+        <div className="sql-brand">
+          <span>⌘</span>
+          <div>
+            <strong>SQL studio</strong>
+            <small>Explore · query · verify</small>
+          </div>
+        </div>
+        <span className="sql-engine">DuckDB · read only</span>
+        <button
+          type="button"
+          aria-pressed={expanded}
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? "Compact editor" : "Expand editor"}
+        </button>
+      </header>
+      <div className="sql-layout">
+        <aside className="sql-explorer" aria-label="Dataset explorer">
+          <div className="sql-section-title">
+            Dataset explorer <span>{data.tables.length} tables</span>
+          </div>
+          <input
+            aria-label="Search tables and columns"
+            placeholder="Find a table or column…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="sql-table-list">
+            {data.tables
+              .filter((t) =>
+                `${t.name} ${t.columns.map((c) => c.name).join(" ")}`
+                  .toLowerCase()
+                  .includes(search.toLowerCase()),
+              )
+              .map((t) => (
+                <button
+                  type="button"
+                  key={t.name}
+                  aria-pressed={tableName === t.name}
+                  onClick={() => {
+                    setTableName(t.name);
+                    setColumns([]);
+                  }}
+                >
+                  <strong>▤ {t.name}</strong>
+                  <span>{t.rowCount} rows</span>
+                </button>
+              ))}
+          </div>
+          {search &&
+            !data.tables.some((t) =>
+              `${t.name} ${t.columns.map((c) => c.name).join(" ")}`
+                .toLowerCase()
+                .includes(search.toLowerCase()),
+            ) && <p className="sql-muted">No matching tables or columns.</p>}
+          {table && (
+            <>
+              <h3>{table.name}</h3>
+              <p className="sql-muted">{table.description}</p>
+              <div className="sql-section-title">
+                Columns <span>Click a name to insert</span>
+              </div>
+              <div className="sql-column-list">
+                {table.columns.map((c) => (
+                  <div className="sql-column" key={c.name}>
+                    <input
+                      type="checkbox"
+                      aria-label={`Include ${c.name} in SELECT`}
+                      checked={columns.includes(c.name)}
+                      onChange={(e) =>
+                        setColumns(
+                          e.target.checked
+                            ? [...columns, c.name]
+                            : columns.filter((n) => n !== c.name),
+                        )
+                      }
+                    />
+                    <div>
+                      <button
+                        type="button"
+                        title={`Insert ${c.name}`}
+                        onClick={() => insert(quoteIdentifier(c.name))}
+                      >
+                        {c.name}
+                      </button>
+                      <small>
+                        {c.type} · {c.nullable ? "nullable" : "not null"}
+                      </small>
+                      {c.key && <span className="sql-key">{c.key}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="sql-build"
+                onClick={() =>
+                  insert(
+                    selectQuery(
+                      table.name,
+                      table.columns
+                        .filter((c) => columns.includes(c.name))
+                        .map((c) => c.name),
+                    ),
+                  )
+                }
+              >
+                + Insert SELECT{" "}
+                {columns.length ? `(${columns.length} columns)` : "*"}
+              </button>
+              <p className="sql-mini">
+                Select columns to build a query. Inserts at the cursor; does not
+                execute.
+              </p>
+              <details className="sql-samples">
+                <summary>Sample rows · first {table.samples.length}</summary>
+                <div className="sql-sample-scroll">
+                  <table>
+                    <thead>
+                      <tr>
+                        {table.columns.map((c) => (
+                          <th key={c.name}>{c.name}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {table.samples.map((row, i) => (
+                        <tr key={i}>
+                          {row.map((cell, j) => (
+                            <td key={j}>
+                              {cell === null ? <em>NULL</em> : String(cell)}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {!table.samples.length && (
+                  <p className="sql-muted">This table is empty.</p>
+                )}
+              </details>
+            </>
+          )}
+          <details className="sql-ddl">
+            <summary>Schema DDL</summary>
+            <pre>{data.ddl}</pre>
+          </details>
+        </aside>
+        <main className="sql-main">
+          <div className="sql-tabs" role="tablist" aria-label="SQL answer tabs">
+            {[
+              ...data.tasks,
+              { id: "scratch", title: "Scratch · ungraded" },
+            ].map((item) => (
+              <button
+                type="button"
+                role="tab"
+                aria-selected={active === item.id}
+                key={item.id}
+                onClick={() => changeTab(item.id)}
+              >
+                {item.title}
+              </button>
+            ))}
+          </div>
+          <div className="sql-contract">
+            <p>
+              {task?.description ||
+                "Explore the visible dataset here. Scratch SQL is never assessed."}
+            </p>
+            {task && (
+              <div>
+                <div className="sql-section-title">
+                  Expected output <span>{task.columns.length} columns</span>
+                </div>
+                <div className="sql-output-columns">
+                  {task.columns.map((c) => (
+                    <span key={c.name}>
+                      <strong>{c.name}</strong>
+                      <small>
+                        {c.type}
+                        {c.scale === undefined ? "" : ` · ${c.scale} decimals`}
+                      </small>
+                    </span>
+                  ))}
+                </div>
+                <p className="sql-mini">
+                  {task.ordered
+                    ? "Row order is assessed as specified above."
+                    : "Row order is not assessed; duplicates still count."}
+                </p>
+              </div>
+            )}
+          </div>
+          <div className="sql-editor-label">
+            <span>
+              {task ? task.title : "Scratch"} <small>.sql</small>
+            </span>
+            <span>
+              {selectionLength
+                ? `${selectionLength} characters selected`
+                : "Ctrl / ⌘ + Enter to run"}
+            </span>
+          </div>
+          <div ref={mount} className="sql-code" />
+          <div className="sql-toolbar">
             <button
               type="button"
-              role="tab"
-              aria-selected={active === item.id}
-              key={item.id}
-              onClick={() => changeTab(item.id)}
+              disabled={data.busy}
+              onClick={() => send("run")}
             >
-              {item.title}
+              {selectionLength ? "Run selection" : "▶ Run query"}
             </button>
-          ),
-        )}
-      </div>
-      <div className="sql-contract">
-        <p>
-          {task?.description ||
-            "Explore the visible dataset here. Scratch SQL is never assessed."}
-        </p>
-        {task && (
-          <p>
-            <strong>Output:</strong>{" "}
-            {task.columns
-              .map(
-                (c) =>
-                  `${c.name} (${c.type}${c.scale === undefined ? "" : `, ${c.scale} decimals`})`,
-              )
-              .join(" · ")}
-            <br />
-            {task.ordered
-              ? "Row order is assessed as specified above."
-              : "Row order is not assessed; duplicates still count."}
-          </p>
-        )}
-      </div>
-      <div ref={mount} className="sql-code" />
-      <div className="sql-toolbar">
-        <button type="button" disabled={data.busy} onClick={() => send("run")}>
-          Run
-        </button>
-        <button
-          type="button"
-          disabled={data.busy}
-          onClick={() => send("explain")}
-        >
-          Explain
-        </button>
-        <button
-          type="button"
-          disabled={data.busy}
-          onClick={() => send("check")}
-        >
-          Check answer
-        </button>
-        <button
-          type="button"
-          disabled={!data.busy}
-          onClick={() => send("cancel")}
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            send("save");
-            const contents = [
-              ...data.tasks,
-              { id: "scratch", title: "Scratch (ungraded)" },
-            ]
-              .map((t) => `-- ${t.title}\n${current.current[t.id] || ""}`)
-              .join("\n\n");
-            const url = URL.createObjectURL(
-              new Blob([contents], { type: "text/plain;charset=utf-8" }),
-            );
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `attempt_${data.attemptId}.sql`;
-            link.click();
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
-          }}
-        >
-          Download SQL
-        </button>
-        <span aria-live="polite">
-          {data.busy
-            ? "Running…"
-            : saved
-              ? "Saved"
-              : "Saving draft… previous results may be outdated"}
-        </span>
-      </div>
-      <div className="sql-footnote">
-        DuckDB · SELECT / WITH / WITH RECURSIVE · Ctrl/Cmd+Enter runs selection
-        or active tab · Checks do not reveal solutions
+            <button
+              type="button"
+              disabled={data.busy}
+              onClick={() => send("explain")}
+            >
+              Explain
+            </button>
+            <button
+              type="button"
+              disabled={data.busy}
+              onClick={() => send("check")}
+            >
+              Check all answers
+            </button>
+            <button
+              type="button"
+              disabled={!data.busy}
+              onClick={() => send("cancel")}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                send("save");
+                const contents = [
+                  ...data.tasks,
+                  { id: "scratch", title: "Scratch (ungraded)" },
+                ]
+                  .map((t) => `-- ${t.title}\n${current.current[t.id] || ""}`)
+                  .join("\n\n");
+                const url = URL.createObjectURL(
+                  new Blob([contents], { type: "text/plain;charset=utf-8" }),
+                );
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `attempt_${data.attemptId}.sql`;
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+              }}
+            >
+              Download SQL
+            </button>
+            <span aria-live="polite">
+              {data.busy
+                ? "Running…"
+                : saved
+                  ? "Saved"
+                  : "Saving draft… previous results may be outdated"}
+            </span>
+          </div>
+          {notice && (
+            <div className="sql-notice" role="status">
+              {notice}
+              <button
+                type="button"
+                aria-label="Dismiss insertion notice"
+                onClick={() => setNotice("")}
+              >
+                ×
+              </button>
+            </div>
+          )}
+          <div className="sql-footnote">
+            One SELECT, WITH or WITH RECURSIVE statement per run. Scratch is
+            ungraded. Checks never reveal solutions.
+          </div>
+        </main>
       </div>
     </div>
   );

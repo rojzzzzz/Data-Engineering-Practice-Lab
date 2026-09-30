@@ -32,6 +32,30 @@ export type Diagram = {
   relationships: Relationship[];
 };
 
+/** Stable grid with row heights based on content, so tall tables never overlap. */
+export function arrangeEntities(diagram: Diagram): Diagram {
+  const columns = Math.max(1, Math.ceil(Math.sqrt(diagram.entities.length)));
+  let y = 60;
+  const entities: Entity[] = [];
+  for (let i = 0; i < diagram.entities.length; i += columns) {
+    const row = diagram.entities.slice(i, i + columns);
+    row.forEach((entity, column) =>
+      entities.push({
+        ...entity,
+        position: { x: 60 + column * 340, y },
+      }),
+    );
+    y +=
+      Math.max(
+        ...row.map(
+          (entity) =>
+            140 + entity.fields.length * 30 + (entity.annotation ? 70 : 0),
+        ),
+      ) + 80;
+  }
+  return { ...diagram, entities };
+}
+
 /** Deleting an entity also removes its incident relationships. */
 export function removeElements(
   diagram: Diagram,

@@ -31,6 +31,8 @@ Open **Challenge Bank**, upload a JSON file with the same structure and new, uni
 
 To offer the ERD editor for a question, set `diagram_kind` to `conceptual_erd`, `logical_erd`, or `star_schema`. The initial bank enables it for CM-001, CM-002, CM-003, DM-002, and NORM-003. Written answers remain available alongside diagrams.
 
+The designer includes a table/field search, role-colored cards, PK/FK badges, type suggestions, table duplication, and a relationship picker alongside drag-to-connect. Use **Tidy layout** to separate tables, **Fit view** to see the model, and **Expand canvas** for more working space. Undo/redo keeps up to 50 edit steps during the current session (Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z outside text fields); deleting a table and its connections is undoable. Text fields retain their native undo behavior.
+
 The built editor assets are included in `src/erd_assets`, so normal Python installs do not need Node.js. To change the editor itself, run `npm ci` and `npm run build` in `erd_frontend`, then commit the updated assets. Docker builds the frontend from the lockfile in a Node build stage.
 
 Developer checks (Node.js 22.19+): run `npm test`, `npm run format:check`, and `npm run build` in `erd_frontend`. The build includes TypeScript checking. Run `python -m pytest -q` from the project root for persistence, validation, and application tests. Use `npm run format` after editing frontend sources.

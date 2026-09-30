@@ -12,20 +12,29 @@ import { memo } from "react";
 function EntityNode({ data }: { data: { entity: Entity } }) {
   const e = data.entity;
   return (
-    <div className="erd-node">
+    <div className={`erd-node erd-node-${e.role}`}>
       <Handle type="target" position={Position.Left} id="left" />
       <Handle type="source" position={Position.Right} id="right" />
       <Handle type="target" position={Position.Top} id="top" />
       <Handle type="source" position={Position.Bottom} id="bottom" />
       <div className="erd-node-heading">
         <small>{e.role}</small>
-        <strong>{e.name}</strong>
+        <strong>{e.name || "Untitled"}</strong>
       </div>
-      {e.annotation && <div className="erd-node-note">{e.annotation}</div>}
+      {e.annotation && (
+        <div className="erd-node-note" title={e.annotation}>
+          {e.annotation}
+        </div>
+      )}
+      {!e.fields.length && (
+        <div className="erd-node-empty">Select to add fields</div>
+      )}
       {e.fields.map((f) => (
         <div className="erd-node-field" key={f.id}>
           <span>
-            {f.pk ? "🔑 " : f.fk ? "⇢ " : ""}
+            <span className={`erd-key ${f.pk || f.fk ? "erd-key-set" : ""}`}>
+              {[f.pk && "PK", f.fk && "FK"].filter(Boolean).join(" ") || "·"}
+            </span>
             {f.name}
           </span>
           <small>{f.data_type}</small>
@@ -60,12 +69,15 @@ function RelationEdge(props: EdgeProps) {
             ? "url(#erd-crowfoot-start)"
             : "url(#erd-one-start)"
         }
-        style={{ stroke: "#607889", strokeWidth: 2 }}
+        style={{
+          stroke: props.selected ? "#0b766e" : "#8597a5",
+          strokeWidth: props.selected ? 3 : 1.6,
+        }}
       />
       {relation && (
         <EdgeLabelRenderer>
           <div
-            className="erd-edge-label"
+            className={`erd-edge-label ${props.selected ? "selected" : ""}`}
             style={{
               transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
             }}
